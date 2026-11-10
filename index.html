@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 반 스마트폰 자율 실천규칙 만들기</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        pastel: {
+                            green: '#e8f5e9',
+                            blue: '#e3f2fd',
+                            purple: '#f3e5f5',
+                            orange: '#fff3e0',
+                            pink: '#fce4ec'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+        .selected-card { border-color: #3b82f6 !important; background-color: #eff6ff !important; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- App Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navToHome()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-mobile-screen-button text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-800 leading-tight">우리 반 스마트폰 자율 실천규칙</h1>
+                    <p class="text-xs text-slate-500">함께 만드는 안전하고 바른 스마트폰 습관</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <span id="firebaseStatusBadge" class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                    <span class="w-2 h-2 mr-1.5 bg-amber-400 rounded-full animate-pulse"></span>
+                    데모 모드 (로컬)
+                </span>
+                <button id="adminLoginBtn" onclick="app.showAdminModal()" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-lock text-slate-500"></i> 교사 관리자
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6">
+
+        <!-- Banner Alert for Demo Mode -->
+        <div id="demoNoticeBanner" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex items-start gap-3">
+                <i class="fa-solid fa-circle-info text-amber-500 text-xl mt-0.5"></i>
+                <div>
+                    <h4 class="font-bold text-amber-900 text-sm">현재 로컬 데모 모드로 작동 중입니다.</h4>
+                    <p class="text-xs text-amber-700">실제 학생들과 다른 기기 간 실시간 데이터를 공유하려면 하단의 안내에 따라 파이어베이스(Firebase)를 연결해 주세요.</p>
+                </div>
+            </div>
+            <button onclick="app.showSetupModal()" class="whitespace-nowrap px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-medium shadow-sm transition-colors">
+                Firebase 설정 가이드
+            </button>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- STUDENT SECTION -->
+        <!-- ======================================================== -->
+        <section id="studentView" class="space-y-6">
+            
+            <!-- Step Progress Indicator -->
+            <div id="stepProgress" class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
+                <div class="flex justify-between items-center max-w-2xl mx-auto relative">
+                    <!-- Progress Line -->
+                    <div class="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 z-0"></div>
+                    <div id="progressBar" class="absolute top-1/2 left-0 h-1 bg-blue-500 -translate-y-1/2 z-0 transition-all duration-300 w-0"></div>
+
+                    <!-- Step 1 -->
+                    <div class="relative z-10 flex flex-col items-center step-item" data-step="1">
+                        <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md transition-all step-circle">1</div>
+                        <span class="text-xs font-semibold mt-1 text-slate-700 step-label">정보 입력</span>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="relative z-10 flex flex-col items-center step-item" data-step="2">
+                        <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm transition-all step-circle">2</div>
+                        <span class="text-xs font-medium mt-1 text-slate-400 step-label">안전(Safety)</span>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="relative z-10 flex flex-col items-center step-item" data-step="3">
+                        <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm transition-all step-circle">3</div>
+                        <span class="text-xs font-medium mt-1 text-slate-400 step-label">태도(Attitude)</span>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="relative z-10 flex flex-col items-center step-item" data-step="4">
+                        <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm transition-all step-circle">4</div>
+                        <span class="text-xs font-medium mt-1 text-slate-400 step-label">최종 제출</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 1: Student Information -->
+            <div id="step1Page" class="bg-white p-6 sm:p-8 rounded-2xl card-shadow border border-slate-100 max-w-2xl mx-auto space-y-6">
+                <div class="text-center space-y-2">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">중학교 2학년 스마트폰 실천규칙</span>
+                    <h2 class="text-2xl font-bold text-slate-800">우리 반 스마트폰 자율 실천규칙 만들기</h2>
+                    <p class="text-slate-600 text-sm leading-relaxed max-w-lg mx-auto">
+                        우리 반에서 함께 지킬 스마트폰 사용 규칙을 만들어 봅시다.<br>규칙을 꼼꼼히 읽고, 가장 필요하다고 생각하는 규칙에 투표해 주세요.
+                    </p>
+                </div>
+
+                <div class="border-t border-slate-100 pt-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">학번 <span class="text-red-500">*</span></label>
+                        <input type="text" id="inputStudentId" placeholder="예: 20101 (2학년 1반 1번)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                        <p class="text-xs text-slate-400 mt-1">학번은 중복 제출 방지 및 확인용으로 사용됩니다.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">이름 <span class="text-red-500">*</span></label>
+                        <input type="text" id="inputStudentName" placeholder="홍길동" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button onclick="app.startVotingStep2()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2">
+                        투표 시작하기 <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Safety Rules Selection -->
+            <div id="step2Page" class="hidden space-y-6">
+                <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-6 rounded-2xl text-white shadow-md flex justify-between items-center">
+                    <div>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">STEP 2</span>
+                        <h2 class="text-xl font-bold mt-1">안전(Safety) 부문 투표</h2>
+                        <p class="text-xs text-teal-100 mt-1">가장 필요하다고 생각하는 안전 규칙 <strong>딱 3개</strong>를 선택하고 이유를 적어주세요.</p>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl text-center">
+                        <span class="text-xs block text-teal-100">선택한 규칙</span>
+                        <span id="safetySelectedCount" class="text-2xl font-black">0 / 3</span>
+                    </div>
+                </div>
+
+                <!-- Rules Grid -->
+                <div id="safetyRulesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cards will be populated by JS -->
+                </div>
+
+                <div class="flex justify-between items-center pt-4">
+                    <button onclick="app.goToStep(1)" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> 이전
+                    </button>
+                    <button onclick="app.goToStep3()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all flex items-center gap-2">
+                        다음 단계 (태도 부문) <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Attitude Rules Selection -->
+            <div id="step3Page" class="hidden space-y-6">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 p-6 rounded-2xl text-white shadow-md flex justify-between items-center">
+                    <div>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">STEP 3</span>
+                        <h2 class="text-xl font-bold mt-1">태도(Attitude) 부문 투표</h2>
+                        <p class="text-xs text-indigo-100 mt-1">가장 필요하다고 생각하는 태도 규칙 <strong>딱 3개</strong>를 선택하고 이유를 적어주세요.</p>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl text-center">
+                        <span class="text-xs block text-indigo-100">선택한 규칙</span>
+                        <span id="attitudeSelectedCount" class="text-2xl font-black">0 / 3</span>
+                    </div>
+                </div>
+
+                <!-- Rules Grid -->
+                <div id="attitudeRulesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cards will be populated by JS -->
+                </div>
+
+                <div class="flex justify-between items-center pt-4">
+                    <button onclick="app.goToStep(2)" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> 이전
+                    </button>
+                    <button onclick="app.goToStep4()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all flex items-center gap-2">
+                        최종 제출 확인하기 <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Review and Submit -->
+            <div id="step4Page" class="hidden bg-white p-6 sm:p-8 rounded-2xl card-shadow border border-slate-100 max-w-3xl mx-auto space-y-6">
+                <div class="text-center space-y-2 border-b border-slate-100 pb-4">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">최종 점검</span>
+                    <h2 class="text-2xl font-bold text-slate-800">투표 내용 확인 및 제출</h2>
+                    <p class="text-slate-500 text-xs">선택하신 규칙과 작성한 이유를 확인 후 최종 제출해 주세요.</p>
+                </div>
+
+                <!-- Student Info Summary -->
+                <div class="bg-slate-50 p-4 rounded-xl flex justify-between items-center border border-slate-200">
+                    <div>
+                        <span class="text-xs text-slate-500 block">제출자 정보</span>
+                        <span id="reviewStudentInfo" class="text-base font-bold text-slate-800">20101 홍길동</span>
+                    </div>
+                    <button onclick="app.goToStep(1)" class="text-xs text-blue-600 hover:underline">정보 수정</button>
+                </div>
+
+                <!-- Safety Summary -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-base">
+                            <span class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 text-xs flex items-center justify-center font-bold">S</span>
+                            안전(Safety) 부문 선택 규칙 3개
+                        </h3>
+                        <button onclick="app.goToStep(2)" class="text-xs text-blue-600 hover:underline">수정</button>
+                    </div>
+                    <div id="reviewSafetyList" class="space-y-3"></div>
+                </div>
+
+                <!-- Attitude Summary -->
+                <div class="space-y-3 border-t border-slate-100 pt-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-base">
+                            <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-bold">A</span>
+                            태도(Attitude) 부문 선택 규칙 3개
+                        </h3>
+                        <button onclick="app.goToStep(3)" class="text-xs text-blue-600 hover:underline">수정</button>
+                    </div>
+                    <div id="reviewAttitudeList" class="space-y-3"></div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-6 flex justify-between items-center">
+                    <button onclick="app.goToStep(3)" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> 이전
+                    </button>
+                    <button onclick="app.submitFinalVote()" class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> 최종 제출하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP Completed Screen -->
+            <div id="submittedPage" class="hidden bg-white p-8 rounded-2xl card-shadow border border-slate-100 max-w-xl mx-auto text-center space-y-6">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+                    <i class="fa-solid fa-check-double"></i>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold text-slate-800">투표가 완료되었습니다!</h2>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        소중한 의견을 제출해 주어 고맙습니다!<br>
+                        우리 반의 스마트폰 자율 실천규칙을 함께 만들어 봅시다.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-left text-xs text-slate-500 space-y-1">
+                    <p>• 제출 학번: <strong id="submittedStudentId" class="text-slate-700"></strong></p>
+                    <p>• 중복 제출 방지 시스템에 의해 동일 학번으로 추가 제출할 수 없습니다.</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- TEACHER ADMIN SECTION -->
+        <!-- ======================================================== -->
+        <section id="adminView" class="hidden space-y-6">
+            <!-- Admin Top Bar -->
+            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-blue-600 text-white text-xs px-2.5 py-0.5 rounded-md font-semibold">교사 전용</span>
+                        <h2 class="text-xl font-bold">우리 반 자율 실천규칙 관리자 대시보드</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">학생별 응답을 조회하고 종합 결과를 확인하여 실천규칙을 제정하세요.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="app.exportToCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-excel"></i> 엑셀/CSV 다운로드
+                    </button>
+                    <button onclick="app.adminLogout()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Navigation Tabs -->
+            <div class="flex border-b border-slate-200 space-x-2">
+                <button onclick="app.switchAdminTab('tab1')" id="adminTab1Btn" class="px-4 py-3 font-semibold text-sm border-b-2 border-blue-600 text-blue-600 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-users"></i> 학생별 투표 & 이유
+                </button>
+                <button onclick="app.switchAdminTab('tab2')" id="adminTab2Btn" class="px-4 py-3 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie"></i> 최종 투표 결과 & 수칙판
+                </button>
+                <button onclick="app.switchAdminTab('tab3')" id="adminTab3Btn" class="px-4 py-3 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-gear"></i> 관리자 설정
+                </button>
+            </div>
+
+            <!-- TAB 1: Student Responses -->
+            <div id="adminTab1" class="space-y-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 card-shadow">
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="adminSearchInput" onkeyup="app.renderStudentList()" placeholder="학번 또는 이름 검색..." class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="text-xs text-slate-500 font-medium">
+                        제출 완료: <span id="totalSubmittedCount" class="font-bold text-blue-600 text-sm">0</span> 명
+                    </div>
+                </div>
+
+                <!-- Student List Accordion Container -->
+                <div id="studentListContainer" class="space-y-3">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- TAB 2: Results & Final Selected Rules -->
+            <div id="adminTab2" class="hidden space-y-6">
+
+                <!-- Class Rules Summary Board -->
+                <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-6 rounded-2xl shadow-xl space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 gap-4">
+                        <div>
+                            <span class="px-2.5 py-1 bg-yellow-400 text-slate-900 text-xs font-black rounded-md uppercase">Final 6 Rules</span>
+                            <h3 class="text-xl font-bold mt-1">우리 반 최종 스마트폰 자율 실천규칙 (6선)</h3>
+                        </div>
+                        <!-- Participation Stats -->
+                        <div class="flex items-center gap-4 bg-slate-800/80 px-4 py-2 rounded-xl text-xs border border-slate-700">
+                            <div>
+                                <span class="text-slate-400 block">전체 학생 수</span>
+                                <input type="number" id="totalClassStudentsInput" value="25" min="1" onchange="app.updateParticipationRate()" class="w-12 bg-slate-700 text-white font-bold text-center rounded border border-slate-600 focus:outline-none">
+                            </div>
+                            <div class="h-6 w-px bg-slate-700"></div>
+                            <div>
+                                <span class="text-slate-400 block">참여율</span>
+                                <span id="participationRateText" class="font-bold text-teal-400">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tie Warning Modal inside Tab if tie occurs -->
+                    <div id="tieWarningBox" class="hidden p-4 bg-amber-500/20 border border-amber-500/50 rounded-xl text-amber-200 text-xs space-y-2">
+                        <p class="font-bold text-amber-300"><i class="fa-solid fa-triangle-exclamation"></i> 동점자 발생 안내</p>
+                        <p id="tieWarningMessage">상위 3위 규칙 선정 시 동점이 발생했습니다. 관리자가 교사 판단으로 최종 3위를 결정할 수 있습니다.</p>
+                        <div id="tieSelectionContainer" class="pt-2 flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Top 3 Safety -->
+                        <div class="space-y-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                            <h4 class="font-bold text-teal-300 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-shield-halved"></i> 안전(Safety) 최종 선정 규칙 (Top 3)
+                            </h4>
+                            <div id="topSafetyList" class="space-y-2">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Top 3 Attitude -->
+                        <div class="space-y-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                            <h4 class="font-bold text-indigo-300 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-heart"></i> 태도(Attitude) 최종 선정 규칙 (Top 3)
+                            </h4>
+                            <div id="topAttitudeList" class="space-y-2">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Voting Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Safety Chart Section -->
+                    <div class="bg-white p-6 rounded-2xl card-shadow border border-slate-100 space-y-4">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center justify-between">
+                            <span><i class="fa-solid fa-shield text-teal-500 mr-2"></i>안전(Safety) 10개 규칙 득표 현황</span>
+                            <span class="text-xs text-slate-400 font-normal">득표순 정렬</span>
+                        </h3>
+                        <div id="safetyChartContainer" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Attitude Chart Section -->
+                    <div class="bg-white p-6 rounded-2xl card-shadow border border-slate-100 space-y-4">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center justify-between">
+                            <span><i class="fa-solid fa-user-check text-indigo-500 mr-2"></i>태도(Attitude) 13개 규칙 득표 현황</span>
+                            <span class="text-xs text-slate-400 font-normal">득표순 정렬</span>
+                        </h3>
+                        <div id="attitudeChartContainer" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Admin Settings -->
+            <div id="adminTab3" class="hidden max-w-xl mx-auto space-y-6">
+                <!-- Change Password Card -->
+                <div class="bg-white p-6 rounded-2xl card-shadow border border-slate-100 space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-key text-blue-600"></i> 교사 비밀번호 변경
+                    </h3>
+                    <p class="text-xs text-slate-500">초기 비밀번호는 <strong>0000</strong> 입니다. 보안을 위해 변경해 주세요.</p>
+                    
+                    <div class="space-y-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">기존 비밀번호</label>
+                            <input type="password" id="currentAdminPw" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">새 비밀번호</label>
+                            <input type="password" id="newAdminPw" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">새 비밀번호 확인</label>
+                            <input type="password" id="confirmAdminPw" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <button onclick="app.changeAdminPassword()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-sm transition-colors">
+                            비밀번호 변경 저장
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Database Reset Card -->
+                <div class="bg-red-50 p-6 rounded-2xl border border-red-200 space-y-4">
+                    <h3 class="font-bold text-red-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-red-600"></i> 투표 데이터 전체 초기화
+                    </h3>
+                    <p class="text-xs text-red-700 leading-relaxed">
+                        모든 학생의 투표 데이터 및 응답 내용이 완전히 삭제됩니다. 이 작업은 되돌릴 수 없으므로 주의하시기 바랍니다.
+                    </p>
+                    <button onclick="app.confirmResetDatabase()" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">
+                        데이터 전체 초기화 실행
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 transform transition-all">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-lg">교사 관리자 접속</h3>
+                <button onclick="app.hideAdminModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">비밀번호 입력 (초기: 0000)</label>
+                <input type="password" id="adminPwInput" onkeypress="if(event.key==='Enter') app.loginAdmin()" placeholder="비밀번호" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="app.hideAdminModal()" class="w-1/2 py-2.5 bg-slate-100 text-slate-600 font-medium text-xs rounded-xl">취소</button>
+                <button onclick="app.loginAdmin()" class="w-1/2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-md">로그인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Connection Config Modal -->
+    <div id="firebaseConfigModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-amber-500"></i> Firebase 연동 설정
+                </h3>
+                <button onclick="app.hideSetupModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                <p>여러 기기(학생 개별 스마트폰)의 데이터를 실시간으로 동기화하려면 Firebase 콘솔에서 발급받은 JS Config 객체를 아래에 입력해 주세요.</p>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-[11px] space-y-1">
+                    <p class="text-slate-400">// 형식 예시:</p>
+                    <p class="text-blue-600">{</p>
+                    <p class="pl-3">"apiKey": "AIzaSy...",</p>
+                    <p class="pl-3">"authDomain": "myproject.firebaseapp.com",</p>
+                    <p class="pl-3">"projectId": "myproject",</p>
+                    <p class="pl-3">"storageBucket": "myproject.appspot.com",</p>
+                    <p class="pl-3">"messagingSenderId": "12345...",</p>
+                    <p class="pl-3">"appId": "1:12345:web:abcde..."</p>
+                    <p class="text-blue-600">}</p>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">JSON 설정값 입력</label>
+                    <textarea id="firebaseConfigInput" rows="6" placeholder='{"apiKey": "...", ...}' class="w-full p-3 font-mono text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button onclick="app.saveFirebaseConfig()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md">
+                    설정 저장 및 연결
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Expose Firebase modules to global window object
+        window.FB = {
+            initializeApp, getAuth, signInAnonymously,
+            getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, getDocs
+        };
+    </script>
+
+    <!-- Main Logic App Script -->
+    <script>
+        // Data Definitions (Rules 10 Safety, 13 Attitude)
+        const SAFETY_RULES = [
+            { id: 1, title: '필요한 어플리케이션만 다운로드 하기', desc: '위변조된 어플리케이션 속에는 위험한 악성코드가 포함될 가능성이 있습니다. 따라서 꼭 필요한 어플리케이션만 안전한지 검증 과정을 거쳐 다운로드하는 것이 좋습니다.' },
+            { id: 2, title: '보낸 사람이 명확하지 않거나 의심스러운 메시지 및 메일 삭제하기', desc: '문자메시지나 메일의 첨부파일이나 링크에는 악성코드가 포함되어 있는 사례가 많습니다. 따라서 아예 열어보거나 클릭하지 말고 삭제하는 것이 좋습니다.' },
+            { id: 3, title: '암호를 설정하고 정기적으로 변경하기', desc: '스마트폰 속에는 나와 주위 사람의 소중한 개인정보가 포함됩니다. 이 정보가 타인에게 제공되면 심각한 피해를 줄 수 있기 때문에 꼭 암호를 설정하여 나와 내 주위 사람을 보호해야 합니다.' },
+            { id: 4, title: '스마트폰 백신 프로그램 설치하기', desc: '백신 프로그램을 반드시 설치하고, 최신 버전으로 업데이트를 해야 합니다. 더불어 정기적인 바이러스 검사를 통해서 스마트폰의 안전을 확인하는 습관이 필요합니다.' },
+            { id: 5, title: '스마트폰 플랫폼 바꾸지 않기 (탈옥 및 루팅)', desc: '스마트폰 플랫폼을 바꾸면 보안 기능에 취약할 수 있으며, 변경 과정에서 스마트폰이 작동 불능 상태가 되는 사례가 빈번합니다.' },
+            { id: 6, title: '블루투스나 와이파이는 사용할 때만 켜놓기', desc: '블루투스나 와이파이를 이용한 악성코드 유포 사례가 늘고 있습니다. 평소 꺼놓다가 필요할 때만 사용하는 것이 전원 낭비를 줄이고 해킹 등의 위험 요소도 줄일 수 있습니다.' },
+            { id: 7, title: '과도한 개인정보를 올리지 않기', desc: '자신의 개인정보는 물론 친구에 관련된 정보를 올리는 것은 보이스피싱 등에 노출될 수 있습니다. 따라서 생일 사진이나 다른 사람의 사진 등을 올리는 행위는 자체해야 합니다.' },
+            { id: 8, title: '타인의 저작물을 동의 없이 올리지 않기', desc: '타인의 저작물을 동의 없이 올리면 저작권법에 의해서 처벌을 받습니다. 따라서 저작권자의 허락을 구하거나 저작권과 무관한지를 살펴보는 습관이 중요합니다.' },
+            { id: 9, title: '걸을 때 스마트폰을 이용하지 않기', desc: '인도나 횡단보도를 걸으면서 스마트폰을 보는 것은 큰 사고를 유발할 수 있습니다. 따라서 걸을 때는 반드시 스마트폰보다 전방과 좌우를 살피면서 걸어야 합니다.' },
+            { id: 10, title: '허위 글을 게시하거나 퍼나르지 않기', desc: '사이버 공간은 현실 공간보다 파급력이 훨씬 큽니다. 따라서 허위로 올린 글이 짧은 시간 동안 엄청난 파장을 몰고 올 수 있습니다. 그리고 이로 인해 게시자나 퍼 나른 사람 모두 처벌의 대상이 될 수 있으므로 절대 해서는 안 됩니다.' }
+        ];
+
+        const ATTITUDE_RULES = [
+            { id: 1, title: '장시간 스마트폰을 사용할 때 반드시 쉬는 시간을 갖기', desc: '스마트폰을 오래 사용할 때는 중간중간 쉬는 시간을 갖고 스트레칭이나 가벼운 운동으로 뇌와 근육의 긴장을 풀어줘야 합니다.' },
+            { id: 2, title: '다른 사람과 함께 할 때 스마트폰은 넣어두기', desc: '식사 시간이나 대화를 할 때처럼 다른 누군가와 의사소통을 할 때는 기초적인 예절로 스마트폰을 가방이나 주머니에 보이지 않게 넣어둡니다.' },
+            { id: 3, title: '바른 자세로 스마트폰 사용하기', desc: '스마트폰을 할 때는 일정한 거리를 두고, 바른 자세로 해야 스마트폰으로 인한 다양한 신체적 질병을 예방할 수 있습니다.' },
+            { id: 4, title: '필요할 때만 스마트폰 사용하기', desc: '식사를 할 때나 화장실에 갈 때 등 스마트폰이 굳이 필요하지 않을 경우에는 스마트폰을 사용하지 않습니다.' },
+            { id: 5, title: '잠자기 전 스마트폰 사용하지 않기', desc: '잠자기 전이나 저녁 식사 시간 이후에는 스마트폰을 꺼두거나 매너 모드로 전환해서 불필요한 두뇌 활동을 줄이고 편안한 상태로 잠자리에 들 수 있도록 합니다.' },
+            { id: 6, title: '가정에서는 가족의 스마트폰 함께 모아두기', desc: '신발장이나 식탁 위 등 가족이 정해놓은 장소에 스마트폰을 함께 모아둠으로써 불필요한 스마트폰의 사용을 줄이고 가족 간의 대화의 시간을 가지려 노력합니다.' },
+            { id: 7, title: '자신의 스마트폰 사용 습관을 점검하기', desc: '하루의 끝이나 한 주에 한 번씩 자신의 스마트폰 사용 습관을 반성해보고 새롭게 시작될 하루나 한 주에 스마트폰 사용 계획을 세워 규칙적으로 스마트폰을 사용합니다.' },
+            { id: 8, title: '나만의 스마트폰 사용 수칙 만들기', desc: '스마트폰은 사람마다 사용하는 용도가 다르기 때문에 자기 자신에 맞는 스마트폰 사용 수칙을 정하고 스스로 조절하며 절제하는 습관을 갖도록 합니다.' },
+            { id: 9, title: '메시지 작성 시 신중하게 생각하고 올리기', desc: '메시지를 통해 다른 사람에게 자신의 생각이나 느낌을 전할 때는 오해의 소지가 있을 수도 있으니 상대방의 감정과 상황을 잘 파악하고 신중하게 메시지를 작성합니다.' },
+            { id: 10, title: '스마트폰에 과도하게 의지하지 않기', desc: '무엇인가 궁금한 것이 생겼을 때는 바로 스마트폰을 통해 모르는 것을 확인하기보다는 대화나 깊이 생각해보고 스스로 사고하고 기억하는 습관을 가집니다.' },
+            { id: 11, title: '사이버 공간에서 타인 괴롭히지 않기', desc: '사이버 공간에서는 사소한 말과 행동이 상대방에게 상처를 입힐 수도 있음을 기억하고 실생활에서처럼 다른 사람을 배려하고 아끼는 마음을 가져야 합니다.' },
+            { id: 12, title: '사이버 상에서 문제 발생 시 부모님이나 선생님께 도움 요청하기', desc: '사이버 저작권 침해나 명예 훼손 등 법적인 문제가 발생하거나 사이버 폭력을 경험했을 경우, 혼자서 문제를 해결하기보다는 주변 어른들의 도움을 받아 신속히 문제를 해결합니다.' },
+            { id: 13, title: '사이버 상의 정보를 맹신하지 않기', desc: '사이버 상에 올라온 다양한 정보들은 모두 올바른 것이 아님을 인식하고 비판적으로 정보를 바라보고 다양한 정보를 종합하여 균형 잡힌 지적 향상을 위해 노력합니다.' }
+        ];
+
+        class SmartRulesApp {
+            constructor() {
+                this.currentStep = 1;
+                this.studentInfo = { id: '', name: '' };
+                this.selectedSafety = []; // Array of { id, reason }
+                this.selectedAttitude = []; // Array of { id, reason }
+                
+                // Admin State
+                this.isAdminLoggedIn = false;
+                this.adminPw = '0000';
+                this.totalClassStudents = 25;
+                this.teacherSelectedTies = { safety: null, attitude: null };
+
+                // Firestore / Local Database
+                this.votes = []; // All student votes array
+                this.db = null;
+                this.isFirebaseConnected = false;
+                
+                this.appId = typeof __app_id !== 'undefined' ? __app_id : 'smart-rules-app';
+            }
+
+            init() {
+                this.renderCards('safety', SAFETY_RULES, 'safetyRulesGrid');
+                this.renderCards('attitude', ATTITUDE_RULES, 'attitudeRulesGrid');
+                this.checkExistingLocalData();
+                this.tryInitFirebase();
+            }
+
+            // Check local fallback storage
+            checkExistingLocalData() {
+                const savedPw = localStorage.getItem('smart_rules_admin_pw');
+                if (savedPw) this.adminPw = savedPw;
+
+                const savedVotes = localStorage.getItem('smart_rules_local_votes');
+                if (savedVotes && !this.isFirebaseConnected) {
+                    try { this.votes = JSON.parse(savedVotes); } catch(e){}
+                }
+            }
+
+            // Firebase Initialization
+            async tryInitFirebase() {
+                let config = null;
+                if (typeof __firebase_config !== 'undefined') {
+                    try { config = JSON.parse(__firebase_config); } catch(e){}
+                }
+                if (!config) {
+                    const localCfg = localStorage.getItem('smart_rules_fb_config');
+                    if (localCfg) {
+                        try { config = JSON.parse(localCfg); } catch(e){}
+                    }
+                }
+
+                if (config && window.FB) {
+                    try {
+                        const app = window.FB.initializeApp(config);
+                        this.db = window.FB.getFirestore(app);
+                        const auth = window.FB.getAuth(app);
+
+                        // Auth setup
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await window.FB.signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await window.FB.signInAnonymously(auth);
+                        }
+
+                        this.isFirebaseConnected = true;
+                        document.getElementById('firebaseStatusBadge').className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200';
+                        document.getElementById('firebaseStatusBadge').innerHTML = '<span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full"></span> Firebase 연동됨';
+                        document.getElementById('demoNoticeBanner').classList.add('hidden');
+
+                        // Listen to real-time votes
+                        this.subscribeFirestoreVotes();
+                    } catch(e) {
+                        console.error('Firebase init error:', e);
+                    }
+                }
+            }
+
+            subscribeFirestoreVotes() {
+                if (!this.db) return;
+                const votesCol = window.FB.collection(this.db, 'artifacts', this.appId, 'public', 'data', 'votes');
+                window.FB.onSnapshot(votesCol, (snapshot) => {
+                    this.votes = snapshot.docs.map(doc => doc.data());
+                    if (this.isAdminLoggedIn) {
+                        this.renderAdminData();
+                    }
+                }, (error) => {
+                    console.error("Firestore listener error:", error);
+                });
+            }
+
+            // Card Rendering (Step 2 & Step 3)
+            renderCards(category, rules, containerId) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = rules.map(rule => `
+                    <div id="${category}-card-${rule.id}" onclick="app.toggleRuleSelection('${category}', ${rule.id})" 
+                         class="bg-white p-5 rounded-2xl border-2 border-slate-100 card-shadow cursor-pointer transition-all hover:border-blue-300 relative group">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                                    ${rule.id}
+                                </span>
+                                <h3 class="font-bold text-slate-800 text-sm leading-snug">${rule.title}</h3>
+                            </div>
+                            <div id="${category}-check-${rule.id}" class="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-white text-xs transition-all">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2.5 leading-relaxed pl-9">${rule.desc}</p>
+                        
+                        <!-- Reason Input Box (Visible only when selected) -->
+                        <div id="${category}-reason-box-${rule.id}" onclick="event.stopPropagation()" class="hidden mt-4 pt-3 border-t border-blue-100 pl-9 space-y-1.5">
+                            <label class="block text-xs font-bold text-blue-700">
+                                <i class="fa-solid fa-pen-nib mr-1"></i>이 규칙이 왜 필요하다고 생각하나요? <span class="text-red-500">*</span>
+                            </label>
+                            <textarea id="${category}-reason-input-${rule.id}" oninput="app.updateReason('${category}', ${rule.id}, this.value)" 
+                                      placeholder="이유를 구체적으로 적어주세요." rows="2" 
+                                      class="w-full p-2.5 bg-white border border-blue-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            toggleRuleSelection(category, ruleId) {
+                const selectedArr = category === 'safety' ? this.selectedSafety : this.selectedAttitude;
+                const index = selectedArr.findIndex(item => item.id === ruleId);
+
+                if (index > -1) {
+                    // Deselect
+                    selectedArr.splice(index, 1);
+                } else {
+                    // Select
+                    if (selectedArr.length >= 3) {
+                        this.showAlert('각 부문당 최대 3개의 규칙만 선택할 수 있습니다.');
+                        return;
+                    }
+                    const reasonInput = document.getElementById(`${category}-reason-input-${ruleId}`);
+                    const reasonVal = reasonInput ? reasonInput.value : '';
+                    selectedArr.push({ id: ruleId, reason: reasonVal });
+                }
+
+                this.updateCardUI(category, ruleId);
+                this.updateSelectedCountUI(category);
+            }
+
+            updateCardUI(category, ruleId) {
+                const selectedArr = category === 'safety' ? this.selectedSafety : this.selectedAttitude;
+                const isSelected = selectedArr.some(item => item.id === ruleId);
+                
+                const card = document.getElementById(`${category}-card-${ruleId}`);
+                const check = document.getElementById(`${category}-check-${ruleId}`);
+                const reasonBox = document.getElementById(`${category}-reason-box-${ruleId}`);
+
+                if (isSelected) {
+                    card.className = "bg-blue-50/40 p-5 rounded-2xl border-2 border-blue-500 shadow-md cursor-pointer transition-all relative";
+                    check.className = "w-6 h-6 rounded-full bg-blue-600 border-2 border-blue-600 flex items-center justify-center text-white text-xs shadow-sm";
+                    reasonBox.classList.remove('hidden');
+                } else {
+                    card.className = "bg-white p-5 rounded-2xl border-2 border-slate-100 card-shadow cursor-pointer transition-all hover:border-blue-300 relative group";
+                    check.className = "w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-white text-xs transition-all";
+                    reasonBox.classList.add('hidden');
+                }
+            }
+
+            updateReason(category, ruleId, val) {
+                const selectedArr = category === 'safety' ? this.selectedSafety : this.selectedAttitude;
+                const target = selectedArr.find(item => item.id === ruleId);
+                if (target) {
+                    target.reason = val;
+                }
+            }
+
+            updateSelectedCountUI(category) {
+                const count = category === 'safety' ? this.selectedSafety.length : this.selectedAttitude.length;
+                const targetEl = document.getElementById(`${category}SelectedCount`);
+                if (targetEl) targetEl.textContent = `${count} / 3`;
+            }
+
+            // Step Navigation Logic
+            goToStep(step) {
+                this.currentStep = step;
+                
+                // Hide all steps
+                [1, 2, 3, 4].forEach(s => {
+                    const el = document.getElementById(`step${s}Page`);
+                    if (el) el.classList.add('hidden');
+                });
+                document.getElementById('submittedPage').classList.add('hidden');
+
+                // Show target step
+                document.getElementById(`step${step}Page`).classList.remove('hidden');
+
+                // Update Progress UI
+                const circles = document.querySelectorAll('.step-circle');
+                const labels = document.querySelectorAll('.step-label');
+                const progressBar = document.getElementById('progressBar');
+
+                progressBar.style.width = `${((step - 1) / 3) * 100}%`;
+
+                circles.forEach((c, idx) => {
+                    const stepNum = idx + 1;
+                    if (stepNum < step) {
+                        c.className = "w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-md transition-all step-circle";
+                        c.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    } else if (stepNum === step) {
+                        c.className = "w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md transition-all step-circle";
+                        c.innerHTML = stepNum;
+                    } else {
+                        c.className = "w-9 h-9 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm transition-all step-circle";
+                        c.innerHTML = stepNum;
+                    }
+                });
+
+                labels.forEach((l, idx) => {
+                    if (idx + 1 === step) {
+                        l.className = "text-xs font-bold mt-1 text-blue-600 step-label";
+                    } else {
+                        l.className = "text-xs font-medium mt-1 text-slate-400 step-label";
+                    }
+                });
+            }
+
+            startVotingStep2() {
+                const studentId = document.getElementById('inputStudentId').value.trim();
+                const studentName = document.getElementById('inputStudentName').value.trim();
+
+                if (!studentId || !studentName) {
+                    this.showAlert('학번과 이름을 모두 입력해 주세요.');
+                    return;
+                }
+
+                // Check duplicate studentId
+                const isAlreadySubmitted = this.votes.some(v => v.studentId === studentId);
+                if (isAlreadySubmitted) {
+                    this.showAlert(`학번 [${studentId}]은(는) 이미 제출이 완료되었습니다. 중복 제출이 불가능합니다.`);
+                    return;
+                }
+
+                this.studentInfo = { id: studentId, name: studentName };
+                this.goToStep(2);
+            }
+
+            goToStep3() {
+                if (this.selectedSafety.length !== 3) {
+                    this.showAlert('안전(Safety) 부문 규칙을 반드시 3개 선택해 주세요.');
+                    return;
+                }
+                for (let item of this.selectedSafety) {
+                    if (!item.reason || item.reason.trim() === '') {
+                        const rule = SAFETY_RULES.find(r => r.id === item.id);
+                        this.showAlert(`선택하신 안전 규칙 [${rule.title}]의 작성 이유를 입력해 주세요.`);
+                        return;
+                    }
+                }
+                this.goToStep(3);
+            }
+
+            goToStep4() {
+                if (this.selectedAttitude.length !== 3) {
+                    this.showAlert('태도(Attitude) 부문 규칙을 반드시 3개 선택해 주세요.');
+                    return;
+                }
+                for (let item of this.selectedAttitude) {
+                    if (!item.reason || item.reason.trim() === '') {
+                        const rule = ATTITUDE_RULES.find(r => r.id === item.id);
+                        this.showAlert(`선택하신 태도 규칙 [${rule.title}]의 작성 이유를 입력해 주세요.`);
+                        return;
+                    }
+                }
+                this.renderReviewPage();
+                this.goToStep(4);
+            }
+
+            renderReviewPage() {
+                document.getElementById('reviewStudentInfo').textContent = `${this.studentInfo.id} ${this.studentInfo.name}`;
+
+                const renderReviewItems = (selectedArr, rulesArr) => {
+                    return selectedArr.map(item => {
+                        const rule = rulesArr.find(r => r.id === item.id);
+                        return `
+                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5">
+                                <p class="font-bold text-slate-800">${rule.id}. ${rule.title}</p>
+                                <p class="text-blue-700 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                                    <strong>이유:</strong> ${this.escapeHtml(item.reason)}
+                                </p>
+                            </div>
+                        `;
+                    }).join('');
+                };
+
+                document.getElementById('reviewSafetyList').innerHTML = renderReviewItems(this.selectedSafety, SAFETY_RULES);
+                document.getElementById('reviewAttitudeList').innerHTML = renderReviewItems(this.selectedAttitude, ATTITUDE_RULES);
+            }
+
+            async submitFinalVote() {
+                const voteData = {
+                    studentId: this.studentInfo.id,
+                    studentName: this.studentInfo.name,
+                    safety: this.selectedSafety,
+                    attitude: this.selectedAttitude,
+                    submittedAt: new Date().toISOString()
+                };
+
+                if (this.isFirebaseConnected && this.db) {
+                    try {
+                        const docRef = window.FB.doc(this.db, 'artifacts', this.appId, 'public', 'data', 'votes', this.studentInfo.id);
+                        await window.FB.setDoc(docRef, voteData);
+                    } catch(e) {
+                        console.error('Firebase save error:', e);
+                        this.showAlert('데이터베이스 저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+                        return;
+                    }
+                } else {
+                    // Local Fallback Storage
+                    this.votes.push(voteData);
+                    localStorage.setItem('smart_rules_local_votes', JSON.stringify(this.votes));
+                }
+
+                document.getElementById('step4Page').classList.add('hidden');
+                document.getElementById('submittedStudentId').textContent = `${this.studentInfo.id} (${this.studentInfo.name})`;
+                document.getElementById('submittedPage').classList.remove('hidden');
+                document.getElementById('stepProgress').classList.add('hidden');
+            }
+
+            // Admin Logic
+            showAdminModal() {
+                document.getElementById('adminLoginModal').classList.remove('hidden');
+            }
+
+            hideAdminModal() {
+                document.getElementById('adminLoginModal').classList.add('hidden');
+            }
+
+            loginAdmin() {
+                const pw = document.getElementById('adminPwInput').value;
+                if (pw === this.adminPw) {
+                    this.isAdminLoggedIn = true;
+                    this.hideAdminModal();
+                    document.getElementById('studentView').classList.add('hidden');
+                    document.getElementById('adminView').classList.remove('hidden');
+                    this.renderAdminData();
+                    document.getElementById('adminPwInput').value = '';
+                } else {
+                    this.showAlert('비밀번호가 올바르지 않습니다.');
+                }
+            }
+
+            adminLogout() {
+                this.isAdminLoggedIn = false;
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('studentView').classList.remove('hidden');
+            }
+
+            navToHome() {
+                if (this.isAdminLoggedIn) {
+                    this.adminLogout();
+                } else {
+                    this.goToStep(1);
+                    document.getElementById('stepProgress').classList.remove('hidden');
+                }
+            }
+
+            switchAdminTab(tabId) {
+                ['tab1', 'tab2', 'tab3'].forEach(t => {
+                    document.getElementById(`adminTab${t.slice(-1)}`).classList.add('hidden');
+                    const btn = document.getElementById(`adminTab${t.slice(-1)}Btn`);
+                    btn.className = "px-4 py-3 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all flex items-center gap-2";
+                });
+
+                document.getElementById(`adminTab${tabId.slice(-1)}`).classList.remove('hidden');
+                const activeBtn = document.getElementById(`adminTab${tabId.slice(-1)}Btn`);
+                activeBtn.className = "px-4 py-3 font-semibold text-sm border-b-2 border-blue-600 text-blue-600 transition-all flex items-center gap-2";
+
+                if (tabId === 'tab1' || tabId === 'tab2') {
+                    this.renderAdminData();
+                }
+            }
+
+            renderAdminData() {
+                this.renderStudentList();
+                this.renderVoteResultsTab2();
+            }
+
+            // TAB 1: Student List Render
+            renderStudentList() {
+                const search = document.getElementById('adminSearchInput')?.value.trim().toLowerCase() || '';
+                const container = document.getElementById('studentListContainer');
+                
+                const filtered = this.votes.filter(v => 
+                    v.studentId.toLowerCase().includes(search) || v.studentName.toLowerCase().includes(search)
+                );
+
+                document.getElementById('totalSubmittedCount').textContent = this.votes.length;
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="bg-white p-8 rounded-xl text-center text-slate-400 text-xs card-shadow">제출된 응답 데이터가 없습니다.</div>`;
+                    return;
+                }
+
+                container.innerHTML = filtered.map((v, idx) => {
+                    const formattedDate = new Date(v.submittedAt).toLocaleString('ko-KR');
+                    
+                    const renderVotesDetail = (selectedList, fullRules) => {
+                        return selectedList.map(s => {
+                            const r = fullRules.find(rule => rule.id === s.id);
+                            return `
+                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                                    <span class="font-bold text-slate-800 text-xs">${r.id}. ${r.title}</span>
+                                    <p class="text-xs text-blue-800 bg-blue-50/60 p-2 rounded border border-blue-100">이유: ${this.escapeHtml(s.reason)}</p>
+                                </div>
+                            `;
+                        }).join('');
+                    };
+
+                    return `
+                        <div class="bg-white rounded-xl border border-slate-200 card-shadow overflow-hidden">
+                            <button onclick="app.toggleStudentDetail('detail-${idx}')" class="w-full p-4 text-left flex justify-between items-center hover:bg-slate-50 transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">${idx + 1}</span>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">${v.studentId} <span class="text-slate-600 font-normal">(${v.studentName})</span></h4>
+                                        <p class="text-[11px] text-slate-400">제출 시각: ${formattedDate}</p>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform" id="icon-detail-${idx}"></i>
+                            </button>
+                            <div id="detail-${idx}" class="hidden p-4 border-t border-slate-100 bg-slate-50/30 space-y-4">
+                                <div class="space-y-2">
+                                    <h5 class="text-xs font-bold text-teal-700"><i class="fa-solid fa-shield mr-1"></i>안전(Safety) 부문 선택</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                        ${renderVotesDetail(v.safety, SAFETY_RULES)}
+                                    </div>
+                                </div>
+                                <div class="space-y-2 border-t border-slate-100 pt-3">
+                                    <h5 class="text-xs font-bold text-indigo-700"><i class="fa-solid fa-heart mr-1"></i>태도(Attitude) 부문 선택</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                        ${renderVotesDetail(v.attitude, ATTITUDE_RULES)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            toggleStudentDetail(id) {
+                const el = document.getElementById(id);
+                const icon = document.getElementById(`icon-${id}`);
+                if (el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    el.classList.add('hidden');
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            }
+
+            // TAB 2: Results & Chart Rendering
+            renderVoteResultsTab2() {
+                const totalVotesCount = this.votes.length;
+                this.updateParticipationRate();
+
+                // Compute counts
+                const safetyCounts = SAFETY_RULES.map(r => ({ ...r, count: 0 }));
+                const attitudeCounts = ATTITUDE_RULES.map(r => ({ ...r, count: 0 }));
+
+                this.votes.forEach(v => {
+                    v.safety.forEach(s => {
+                        const target = safetyCounts.find(r => r.id === s.id);
+                        if (target) target.count++;
+                    });
+                    v.attitude.forEach(a => {
+                        const target = attitudeCounts.find(r => r.id === a.id);
+                        if (target) target.count++;
+                    });
+                });
+
+                // Sort descending
+                safetyCounts.sort((a, b) => b.count - a.count);
+                attitudeCounts.sort((a, b) => b.count - a.count);
+
+                // Render Safety Chart
+                this.renderCategoryChart('safetyChartContainer', safetyCounts, totalVotesCount, 'teal');
+                // Render Attitude Chart
+                this.renderCategoryChart('attitudeChartContainer', attitudeCounts, totalVotesCount, 'indigo');
+
+                // Compute Top 3 & Handle Ties
+                this.computeAndRenderTop3('safety', safetyCounts, 'topSafetyList', 'teal');
+                this.computeAndRenderTop3('attitude', attitudeCounts, 'topAttitudeList', 'indigo');
+            }
+
+            renderCategoryChart(containerId, sortedData, totalStudents, themeColor) {
+                const container = document.getElementById(containerId);
+                const colorClass = themeColor === 'teal' ? 'bg-teal-500' : 'bg-indigo-500';
+
+                container.innerHTML = sortedData.map((item, idx) => {
+                    const percentage = totalStudents > 0 ? ((item.count / totalStudents) * 100).toFixed(1) : 0;
+                    const isTop3 = idx < 3 && item.count > 0;
+                    const badgeClass = isTop3 ? 'bg-amber-100 text-amber-800 border-amber-300 font-bold' : 'bg-slate-100 text-slate-600';
+
+                    return `
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-medium text-slate-700 flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded ${badgeClass} text-[10px] flex items-center justify-center border">${idx + 1}</span>
+                                    ${item.title}
+                                </span>
+                                <span class="font-bold text-slate-800">${item.count}표 <span class="text-slate-400 font-normal">(${percentage}%)</span></span>
+                            </div>
+                            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden flex">
+                                <div class="h-full ${colorClass} transition-all duration-500 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            computeAndRenderTop3(category, sortedData, containerId, themeColor) {
+                const container = document.getElementById(containerId);
+                const tieBox = document.getElementById('tieWarningBox');
+
+                if (this.votes.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-400">투표가 진행되면 Top 3 수칙이 자동으로 집계됩니다.</p>`;
+                    return;
+                }
+
+                // Check for ties at rank 3 boundary
+                const scoreAt3 = sortedData[2] ? sortedData[2].count : 0;
+                let top3List = sortedData.slice(0, 3);
+
+                // Find all items tied with 3rd rank score
+                const tiedItemsAt3 = sortedData.filter(item => item.count === scoreAt3 && scoreAt3 > 0);
+
+                if (tiedItemsAt3.length > 1 && sortedData[1].count !== sortedData[2].count) {
+                    // Tie exists for 3rd place!
+                    if (!this.teacherSelectedTies[category]) {
+                        tieBox.classList.remove('hidden');
+                        document.getElementById('tieSelectionContainer').innerHTML = tiedItemsAt3.map(item => `
+                            <button onclick="app.resolveTie('${category}', ${item.id})" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-bold shadow">
+                                ${category === 'safety' ? '안전' : '태도'} 3위로 [${item.id}. ${item.title}] 선택하기
+                            </button>
+                        `).join('');
+                    }
+                }
+
+                // If teacher manually selected tie winner, use it
+                if (this.teacherSelectedTies[category]) {
+                    const selectedTieId = this.teacherSelectedTies[category];
+                    const selectedItem = sortedData.find(i => i.id === selectedTieId);
+                    top3List = [sortedData[0], sortedData[1], selectedItem];
+                }
+
+                container.innerHTML = top3List.map((item, idx) => `
+                    <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700 flex justify-between items-center text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-md bg-amber-400 text-slate-900 font-black text-xs flex items-center justify-center">${idx + 1}위</span>
+                            <span class="font-bold text-slate-100">${item.title}</span>
+                        </div>
+                        <span class="text-slate-400 font-semibold">${item.count}표</span>
+                    </div>
+                `).join('');
+            }
+
+            resolveTie(category, ruleId) {
+                this.teacherSelectedTies[category] = ruleId;
+                document.getElementById('tieWarningBox').classList.add('hidden');
+                this.renderVoteResultsTab2();
+            }
+
+            updateParticipationRate() {
+                const totalInput = document.getElementById('totalClassStudentsInput');
+                if (totalInput) {
+                    this.totalClassStudents = parseInt(totalInput.value) || 25;
+                }
+                const rate = this.totalClassStudents > 0 ? ((this.votes.length / this.totalClassStudents) * 100).toFixed(1) : 0;
+                const el = document.getElementById('participationRateText');
+                if (el) el.textContent = `${rate}% (${this.votes.length}/${this.totalClassStudents}명)`;
+            }
+
+            // Export to CSV Function
+            exportToCSV() {
+                if (this.votes.length === 0) {
+                    this.showAlert('다운로드할 투표 데이터가 없습니다.');
+                    return;
+                }
+
+                let csvContent = "\uFEFF학번,이름,안전규칙1,안전이유1,안전규칙2,안전이유2,안전규칙3,안전이유3,태도규칙1,태도이유1,태도규칙2,태도이유2,태도규칙3,태도이유3,제출시간\n";
+
+                this.votes.forEach(v => {
+                    const s1 = SAFETY_RULES.find(r => r.id === v.safety[0]?.id)?.title || '';
+                    const r1 = (v.safety[0]?.reason || '').replace(/"/g, '""');
+                    const s2 = SAFETY_RULES.find(r => r.id === v.safety[1]?.id)?.title || '';
+                    const r2 = (v.safety[1]?.reason || '').replace(/"/g, '""');
+                    const s3 = SAFETY_RULES.find(r => r.id === v.safety[2]?.id)?.title || '';
+                    const r3 = (v.safety[2]?.reason || '').replace(/"/g, '""');
+
+                    const a1 = ATTITUDE_RULES.find(r => r.id === v.attitude[0]?.id)?.title || '';
+                    const ar1 = (v.attitude[0]?.reason || '').replace(/"/g, '""');
+                    const a2 = ATTITUDE_RULES.find(r => r.id === v.attitude[1]?.id)?.title || '';
+                    const ar2 = (v.attitude[1]?.reason || '').replace(/"/g, '""');
+                    const a3 = ATTITUDE_RULES.find(r => r.id === v.attitude[2]?.id)?.title || '';
+                    const ar3 = (v.attitude[2]?.reason || '').replace(/"/g, '""');
+
+                    csvContent += `"${v.studentId}","${v.studentName}","${s1}","${r1}","${s2}","${r2}","${s3}","${r3}","${a1}","${ar1}","${a2}","${ar2}","${a3}","${ar3}","${v.submittedAt}"\n`;
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `우리반_스마트폰_실천규칙_투표결과_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // TAB 3: Admin Settings
+            changeAdminPassword() {
+                const current = document.getElementById('currentAdminPw').value;
+                const newPw = document.getElementById('newAdminPw').value;
+                const confirmPw = document.getElementById('confirmAdminPw').value;
+
+                if (current !== this.adminPw) {
+                    this.showAlert('기존 비밀번호가 일치하지 않습니다.');
+                    return;
+                }
+                if (!newPw || newPw.length < 4) {
+                    this.showAlert('새 비밀번호는 4자리 이상 입력해 주세요.');
+                    return;
+                }
+                if (newPw !== confirmPw) {
+                    this.showAlert('새 비밀번호 확인이 일치하지 않습니다.');
+                    return;
+                }
+
+                this.adminPw = newPw;
+                localStorage.setItem('smart_rules_admin_pw', newPw);
+                this.showAlert('관리자 비밀번호가 성공적으로 변경되었습니다.');
+                document.getElementById('currentAdminPw').value = '';
+                document.getElementById('newAdminPw').value = '';
+                document.getElementById('confirmAdminPw').value = '';
+            }
+
+            async confirmResetDatabase() {
+                if (confirm('정말로 모든 학생 투표 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                    if (this.isFirebaseConnected && this.db) {
+                        try {
+                            const votesCol = window.FB.collection(this.db, 'artifacts', this.appId, 'public', 'data', 'votes');
+                            const snapshot = await window.FB.getDocs(votesCol);
+                            for (let d of snapshot.docs) {
+                                await window.FB.deleteDoc(d.ref);
+                            }
+                        } catch(e) {
+                            console.error('Firebase clear error:', e);
+                        }
+                    }
+                    
+                    this.votes = [];
+                    localStorage.removeItem('smart_rules_local_votes');
+                    this.renderAdminData();
+                    this.showAlert('데이터베이스가 성공적으로 초기화되었습니다.');
+                }
+            }
+
+            // Firebase Config Setup Modal Operations
+            showSetupModal() {
+                document.getElementById('firebaseConfigModal').classList.remove('hidden');
+            }
+
+            hideSetupModal() {
+                document.getElementById('firebaseConfigModal').classList.add('hidden');
+            }
+
+            saveFirebaseConfig() {
+                const val = document.getElementById('firebaseConfigInput').value.trim();
+                try {
+                    const parsed = JSON.parse(val);
+                    localStorage.setItem('smart_rules_fb_config', JSON.stringify(parsed));
+                    this.hideSetupModal();
+                    this.showAlert('Firebase 설정이 저장되었습니다. 페이지를 새로고침하여 연결을 완료하세요.');
+                    setTimeout(() => location.reload(), 1500);
+                } catch(e) {
+                    this.showAlert('올바른 JSON 형식이 아닙니다. 입력값을 다시 확인해 주세요.');
+                }
+            }
+
+            // Helpers
+            showAlert(msg) {
+                // UI Modal Alert alternative to alert()
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300 transform translate-y-0 opacity-100';
+                alertDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-400"></i> <span>${msg}</span>`;
+                document.body.appendChild(alertDiv);
+
+                setTimeout(() => {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transform = 'translate(-50%, -20px)';
+                    setTimeout(() => alertDiv.remove(), 300);
+                }, 3000);
+            }
+
+            escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/&/g, "&amp;")
+                          .replace(/</g, "&lt;")
+                          .replace(/>/g, "&gt;")
+                          .replace(/"/g, "&quot;")
+                          .replace(/'/g, "&#039;");
+            }
+        }
+
+        // Initialize App Globally
+        window.app = new SmartRulesApp();
+        window.onload = () => {
+            window.app.init();
+        };
+    </script>
+</body>
+</html>
