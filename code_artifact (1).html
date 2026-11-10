@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>우리 반 스마트폰 자율 실천규칙 만들기</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Font: Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            },
+            pastelBlue: '#E6F0FA',
+            pastelPurple: '#F3E8FF',
+            pastelGreen: '#E6F4EA',
+            pastelYellow: '#FEF7E0',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 50%, #faf5ff 100%);
+      min-height: 100vh;
+    }
+    .custom-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    }
+    .card-selected {
+      border-color: #3b82f6 !important;
+      background-color: #eff6ff !important;
+      box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.15) !important;
+    }
+    /* Custom Scrollbar for smooth UX */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Header & Navigation -->
+  <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        <!-- Logo / Title -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl shadow-md">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight leading-tight">우리 반 스마트폰 자율 실천규칙</h1>
+            <p class="text-xs text-slate-500 hidden sm:block">중학교 2학년 스마트폰 약속 만들기</p>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex items-center gap-1 sm:gap-2">
+          <button id="nav-home" onclick="navigateTo('home')" class="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 bg-blue-50 text-blue-600">
+            <i class="fa-solid fa-house"></i>
+            <span>홈</span>
+          </button>
+          <button id="nav-student" onclick="navigateTo('student-info')" class="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-check-to-slot"></i>
+            <span>학생 투표하기</span>
+          </button>
+          <button id="nav-teacher" onclick="navigateTo('teacher-dashboard')" class="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>교사용 결과 확인</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 sm:py-10">
+
+    <!-- Toast Notification Message Box -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+      <div id="toast-content" class="bg-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-medium">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-blue-400 text-lg"></i>
+        <span id="toast-message">메시지 내용</span>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 1: HOME PAGE -->
+    <!-- ========================================================================= -->
+    <section id="screen-home" class="space-y-8">
+      <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 custom-shadow text-center space-y-6">
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-xs sm:text-sm font-bold">
+          <i class="fa-solid fa-sparkles"></i> 2학년 학급 자율 실천 프로젝트
+        </div>
+        
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+          우리 반에서 함께 지킬<br class="sm:hidden"> 스마트폰 자율 실천규칙을 만들어 봅시다!
+        </h2>
+        
+        <div class="max-w-2xl mx-auto bg-slate-50 p-5 sm:p-7 rounded-2xl border border-slate-200/80 text-left space-y-3 text-slate-600 text-sm sm:text-base leading-relaxed">
+          <p class="font-medium text-slate-800">스마트폰을 사용할 때 우리에게 필요한 규칙은 무엇일까요?</p>
+          <p>
+            표준안에 제시된 규칙을 살펴보고, 우리 학급에 꼭 필요하다고 생각하는 규칙을 선택해 주세요.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div class="bg-white p-3.5 rounded-xl border border-blue-100 flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">안전</span>
+              <span class="text-xs sm:text-sm text-slate-700">안전 영역 규칙 3개 선택</span>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-purple-100 flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">태도</span>
+              <span class="text-xs sm:text-sm text-slate-700">태도 영역 규칙 3개 선택</span>
+            </div>
+          </div>
+          <p class="pt-1 text-xs sm:text-sm text-slate-500">
+            * 각 규칙이 우리 학급에 필요한 이유도 함께 적어주세요. 여러분의 생각이 모여 우리 반의 새로운 약속이 만들어집니다.
+          </p>
+        </div>
+
+        <div>
+          <button onclick="navigateTo('student-info')" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg rounded-2xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 mx-auto">
+            <span>투표 시작하기</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 2: STUDENT INFO INPUT -->
+    <!-- ========================================================================= -->
+    <section id="screen-student-info" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 custom-shadow max-w-xl mx-auto space-y-6">
+        <div class="text-center space-y-2">
+          <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
+            <i class="fa-solid fa-user-pen"></i>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">학생 정보 입력</h2>
+          <p class="text-xs sm:text-sm text-slate-500">투표 작성을 위해 학번과 이름을 입력해주세요.</p>
+        </div>
+
+        <form id="info-form" onsubmit="handleInfoSubmit(event)" class="space-y-5">
+          <div class="space-y-2">
+            <label for="student-id" class="block text-sm font-bold text-slate-700">학번 <span class="text-red-500">*</span></label>
+            <input type="number" id="student-id" placeholder="예: 20101 (숫자만 입력)" required min="1" max="99999" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-base font-medium outline-none transition-all placeholder:text-slate-400">
+            <p class="text-xs text-slate-400">※ 번호 또는 학번 전체 숫자를 입력하세요.</p>
+          </div>
+
+          <div class="space-y-2">
+            <label for="student-name" class="block text-sm font-bold text-slate-700">이름 <span class="text-red-500">*</span></label>
+            <input type="text" id="student-name" placeholder="홍길동" required class="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-base font-medium outline-none transition-all placeholder:text-slate-400">
+          </div>
+
+          <div class="pt-4">
+            <button type="submit" class="w-full py-4 bg-blue-600 text-white font-bold text-base rounded-2xl shadow-lg shadow-blue-500/25 hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+              <span>다음 (안전 영역 선택)</span>
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 3: STEP 1 - SAFETY RULES (10 Items) -->
+    <!-- ========================================================================= -->
+    <section id="screen-step1" class="hidden space-y-6">
+      <!-- Progress Bar & Header -->
+      <div class="bg-white rounded-3xl p-5 sm:p-7 border border-slate-100 custom-shadow space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-xs font-bold px-3 py-1 bg-blue-100 text-blue-700 rounded-full">STEP 1</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">안전 영역 규칙 선택</h2>
+          </div>
+          <!-- Counter Badge -->
+          <div class="flex items-center gap-2 self-start sm:self-auto bg-slate-100 px-4 py-2 rounded-2xl">
+            <span class="text-xs sm:text-sm font-medium text-slate-600">현재 선택:</span>
+            <span id="safety-counter" class="text-base sm:text-lg font-extrabold text-blue-600">0 / 3</span>
+          </div>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          우리의 스마트폰을 안전하게 사용하기 위해 필요한 규칙 3가지를 선택해 주세요. (정확히 3개 선택)
+        </p>
+      </div>
+
+      <!-- Safety Rules Grid -->
+      <div id="safety-rules-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- JS generated cards -->
+      </div>
+
+      <!-- Bottom Action Navigation -->
+      <div class="flex items-center justify-between pt-4 bg-white/60 p-4 rounded-2xl backdrop-blur-sm border border-white sticky bottom-4 z-40">
+        <button onclick="navigateTo('student-info')" class="px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition-all">
+          <i class="fa-solid fa-chevron-left mr-1.5"></i> 이전 (정보 입력)
+        </button>
+        <button id="btn-to-step2" onclick="goToStep2()" disabled class="px-6 py-3.5 bg-slate-300 text-slate-500 font-bold text-sm sm:text-base rounded-xl cursor-not-allowed transition-all flex items-center gap-2">
+          <span>다음 (태도 영역 선택)</span>
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 4: STEP 2 - ATTITUDE RULES (13 Items) -->
+    <!-- ========================================================================= -->
+    <section id="screen-step2" class="hidden space-y-6">
+      <!-- Header -->
+      <div class="bg-white rounded-3xl p-5 sm:p-7 border border-slate-100 custom-shadow space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-xs font-bold px-3 py-1 bg-purple-100 text-purple-700 rounded-full">STEP 2</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">태도 영역 규칙 선택</h2>
+          </div>
+          <!-- Counter Badge -->
+          <div class="flex items-center gap-2 self-start sm:self-auto bg-slate-100 px-4 py-2 rounded-2xl">
+            <span class="text-xs sm:text-sm font-medium text-slate-600">현재 선택:</span>
+            <span id="attitude-counter" class="text-base sm:text-lg font-extrabold text-purple-600">0 / 3</span>
+          </div>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          스마트폰을 올바르게 사용하기 위해 우리 학급에 필요한 규칙 3가지를 선택해 주세요. (정확히 3개 선택)
+        </p>
+      </div>
+
+      <!-- Attitude Rules Grid -->
+      <div id="attitude-rules-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- JS generated cards -->
+      </div>
+
+      <!-- Bottom Action Navigation -->
+      <div class="flex items-center justify-between pt-4 bg-white/60 p-4 rounded-2xl backdrop-blur-sm border border-white sticky bottom-4 z-40">
+        <button onclick="navigateTo('step1')" class="px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition-all">
+          <i class="fa-solid fa-chevron-left mr-1.5"></i> 이전 (안전 영역)
+        </button>
+        <button id="btn-to-confirm" onclick="goToConfirm()" disabled class="px-6 py-3.5 bg-slate-300 text-slate-500 font-bold text-sm sm:text-base rounded-xl cursor-not-allowed transition-all flex items-center gap-2">
+          <span>최종 작성 내용 확인</span>
+          <i class="fa-solid fa-list-check"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 5: FINAL CONFIRMATION & SUBMIT -->
+    <!-- ========================================================================= -->
+    <section id="screen-confirm" class="hidden space-y-6 max-w-3xl mx-auto">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 custom-shadow space-y-6">
+        <div class="text-center space-y-2 border-b border-slate-100 pb-5">
+          <div class="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
+            <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">제출 내용 최종 확인</h2>
+          <p class="text-xs sm:text-sm text-slate-500">선택한 규칙과 이유를 제출하기 전에 확인해 주세요.</p>
+        </div>
+
+        <!-- Student Info Header -->
+        <div class="bg-slate-50 p-4 rounded-2xl flex items-center justify-between text-sm font-semibold text-slate-700 border border-slate-200">
+          <div><i class="fa-solid fa-id-card text-blue-500 mr-2"></i>학번: <span id="confirm-id" class="text-slate-900 font-bold"></span></div>
+          <div><i class="fa-solid fa-user text-blue-500 mr-2"></i>이름: <span id="confirm-name" class="text-slate-900 font-bold"></span></div>
+        </div>
+
+        <!-- Selected Safety Rules Summary -->
+        <div class="space-y-3">
+          <h3 class="text-base font-bold text-blue-700 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i> 안전 영역 선택 규칙 (3개)
+          </h3>
+          <div id="confirm-safety-list" class="space-y-2">
+            <!-- JS dynamic content -->
+          </div>
+        </div>
+
+        <!-- Selected Attitude Rules Summary -->
+        <div class="space-y-3 pt-2">
+          <h3 class="text-base font-bold text-purple-700 flex items-center gap-2">
+            <i class="fa-solid fa-heart"></i> 태도 영역 선택 규칙 (3개)
+          </h3>
+          <div id="confirm-attitude-list" class="space-y-2">
+            <!-- JS dynamic content -->
+          </div>
+        </div>
+
+        <!-- Storage & Connection Status Info -->
+        <div id="submission-status-banner" class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 text-xs sm:text-sm text-indigo-800 space-y-1">
+          <div class="font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> 데이터 저장 및 연동 준비됨
+          </div>
+          <p class="text-indigo-600/90">
+            제출 시 학급 로컬 브라우저 DB에 응답 데이터가 안전하게 저장되며, 자동 CSV 다운로드가 가능합니다. 교사용 확인 페이지에서 종합 집계됩니다.
+          </p>
+        </div>
+
+        <!-- Bottom Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center gap-3 pt-4">
+          <button onclick="navigateTo('step2')" class="w-full sm:w-1/3 py-3.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>이전 단계로 (수정)</span>
+          </button>
+          <button id="final-submit-btn" onclick="submitVote()" class="w-full sm:w-2/3 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base rounded-xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>최종 의견 제출하기</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 6: SUBMISSION COMPLETE -->
+    <!-- ========================================================================= -->
+    <section id="screen-success" class="hidden space-y-6 text-center max-w-xl mx-auto py-8">
+      <div class="bg-white rounded-3xl p-8 sm:p-12 border border-slate-100 custom-shadow space-y-6">
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-4xl shadow-inner animate-bounce">
+          <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">제출 완료!</h2>
+
+        <p class="text-sm sm:text-base text-slate-600 leading-relaxed font-medium bg-emerald-50/70 p-5 rounded-2xl border border-emerald-100">
+          "소중한 의견을 제출해 주어 고맙습니다!<br>
+          여러분의 의견이 모여 우리 반의 스마트폰 자율 실천규칙이 만들어집니다."
+        </p>
+
+        <div class="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
+          <button onclick="downloadMyResponseCSV()" class="px-5 py-3 rounded-xl border border-emerald-500 text-emerald-700 hover:bg-emerald-50 text-sm font-bold flex items-center justify-center gap-2 transition-all">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>내 응답 CSV 파일 저장</span>
+          </button>
+          <button onclick="navigateTo('home')" class="px-6 py-3 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-900 transition-all">
+            첫 화면으로 돌아가기
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 7: TEACHER / RESULTS DASHBOARD -->
+    <!-- ========================================================================= -->
+    <section id="screen-teacher-dashboard" class="hidden space-y-6">
+      
+      <!-- Dashboard Header & CSV Upload Controller -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 custom-shadow space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div>
+            <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">교사용 대시보드</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">우리 반 스마트폰 자율 실천규칙 투표 결과</h2>
+          </div>
+          <!-- Upload & Actions -->
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold cursor-pointer transition-all flex items-center gap-2 shadow-md shadow-blue-500/20">
+              <i class="fa-solid fa-file-csv"></i>
+              <span>Canva / CSV 데이터 업로드</span>
+              <input type="file" id="csv-file-input" accept=".csv" onchange="handleCSVUpload(event)" class="hidden">
+            </label>
+            <button onclick="loadFromLocalStorage()" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-rotate"></i>
+              <span>로컬 데이터 새로고침</span>
+            </button>
+            <button onclick="downloadResultsSummaryCSV()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-download"></i>
+              <span>결과 CSV 내려받기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Upload Status Indicator Banner -->
+        <div id="data-source-status" class="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-600 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-database text-slate-400"></i>
+            <span id="data-source-text">현재 로컬 브라우저 저장소 데이터 집계 중</span>
+          </div>
+          <span id="last-updated-time" class="text-slate-400 text-xs"></span>
+        </div>
+
+        <!-- Teacher Dashboard Tab Navigation -->
+        <div class="flex flex-wrap gap-2 pt-2 border-b border-slate-200 overflow-x-auto pb-1">
+          <button id="tab-btn-summary" onclick="switchTeacherTab('summary')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-900 text-white">
+            1. 전체 응답 요약
+          </button>
+          <button id="tab-btn-students" onclick="switchTeacherTab('students')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+            2. 학생별 응답 보기
+          </button>
+          <button id="tab-btn-safety" onclick="switchTeacherTab('safety')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+            3. 안전 영역 결과
+          </button>
+          <button id="tab-btn-attitude" onclick="switchTeacherTab('attitude')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+            4. 태도 영역 결과
+          </button>
+          <button id="tab-btn-reasons" onclick="switchTeacherTab('reasons')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+            5. 이유 모아보기
+          </button>
+          <button id="tab-btn-final" onclick="switchTeacherTab('final')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+            6. 최종 선정 결과
+          </button>
+        </div>
+      </div>
+
+      <!-- TEACHER TAB CONTENT AREA -->
+      <div id="teacher-tab-contents">
+        
+        <!-- ======================================================= -->
+        <!-- TAB 1: SUMMARY -->
+        <!-- ======================================================= -->
+        <div id="teacher-tab-summary" class="space-y-6">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 custom-shadow space-y-1">
+              <p class="text-xs font-semibold text-slate-500">총 제출 응답 수</p>
+              <p id="stat-total-responses" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 custom-shadow space-y-1">
+              <p class="text-xs font-semibold text-slate-500">유효 학생 응답 수</p>
+              <p id="stat-valid-responses" class="text-2xl sm:text-3xl font-extrabold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 custom-shadow space-y-1">
+              <p class="text-xs font-semibold text-slate-500">중복 학번 제출 수</p>
+              <p id="stat-duplicate-ids" class="text-2xl sm:text-3xl font-extrabold text-amber-500">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 custom-shadow space-y-1">
+              <p class="text-xs font-semibold text-slate-500">안전 영역 총 표수</p>
+              <p id="stat-safety-votes" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 custom-shadow space-y-1 col-span-2 sm:col-span-1">
+              <p class="text-xs font-semibold text-slate-500">태도 영역 총 표수</p>
+              <p id="stat-attitude-votes" class="text-2xl sm:text-3xl font-extrabold text-purple-600">0</p>
+            </div>
+          </div>
+
+          <!-- Duplicate Student Alert Badge -->
+          <div id="duplicate-alert-box" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 text-amber-900 space-y-2">
+            <div class="flex items-center gap-2 font-bold text-sm sm:text-base">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+              <span>중복 입력된 학번이 감지되었습니다!</span>
+            </div>
+            <p class="text-xs sm:text-sm text-amber-700">
+              동일 학번으로 여러 번 작성된 응답이 있습니다. 교사는 학생별 응답 확인 메뉴에서 중복 내역을 확인하고 유효 응답 처리를 확인해 주세요.
+            </p>
+            <div id="duplicate-list-badges" class="flex flex-wrap gap-2 pt-1">
+              <!-- Dynamic duplicate badges -->
+            </div>
+          </div>
+
+          <!-- Top Summary Highlights Preview -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 custom-shadow space-y-4">
+              <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-blue-500"></i> 안전 영역 Top 3 현황
+              </h3>
+              <div id="summary-top-safety" class="space-y-3">
+                <!-- JS Insert -->
+              </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 custom-shadow space-y-4">
+              <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-heart text-purple-500"></i> 태도 영역 Top 3 현황
+              </h3>
+              <div id="summary-top-attitude" class="space-y-3">
+                <!-- JS Insert -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 2: STUDENT RESPONSES TABLE & CARDS -->
+        <!-- ======================================================= -->
+        <div id="teacher-tab-students" class="hidden space-y-6">
+          <div class="bg-white rounded-3xl p-6 border border-slate-100 custom-shadow space-y-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <h3 class="text-lg font-bold text-slate-900">학생별 작성 제출 응답 목록</h3>
+              
+              <!-- Search Filter -->
+              <div class="w-full sm:w-72 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="student-search-input" onkeyup="filterStudentResponses()" placeholder="학번 또는 이름 검색..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-blue-500">
+              </div>
+            </div>
+
+            <div id="student-responses-container" class="space-y-3 pt-2">
+              <!-- Dynamic Cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 3: SAFETY RESULTS -->
+        <!-- ======================================================= -->
+        <div id="teacher-tab-safety" class="hidden space-y-6">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 custom-shadow space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+              <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-blue-600"></i> 안전 영역 투표 순위 (10개 항목)
+              </h3>
+              <span class="text-xs text-slate-500">득표수 순 자동 정렬</span>
+            </div>
+
+            <!-- Tied Rank Alert Slot -->
+            <div id="safety-tie-alert" class="hidden bg-indigo-50 border border-indigo-200 text-indigo-900 p-4 rounded-2xl text-xs sm:text-sm">
+              <i class="fa-solid fa-circle-info text-indigo-600 mr-1.5"></i>
+              <strong>동점 안내:</strong> 상위 권역에 동점이 발생했습니다. 공동 순위로 계산되며 최상단 및 최종 선정 탭에서 확인이 가능합니다.
+            </div>
+
+            <!-- List of Ranked Safety Items with Horizontal Bar Charts -->
+            <div id="safety-rank-list" class="space-y-4">
+              <!-- JS Generated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 4: ATTITUDE RESULTS -->
+        <!-- ======================================================= -->
+        <div id="teacher-tab-attitude" class="hidden space-y-6">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 custom-shadow space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+              <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-heart text-purple-600"></i> 태도 영역 투표 순위 (13개 항목)
+              </h3>
+              <span class="text-xs text-slate-500">득표수 순 자동 정렬</span>
+            </div>
+
+            <!-- Tied Rank Alert Slot -->
+            <div id="attitude-tie-alert" class="hidden bg-purple-50 border border-purple-200 text-purple-900 p-4 rounded-2xl text-xs sm:text-sm">
+              <i class="fa-solid fa-circle-info text-purple-600 mr-1.5"></i>
+              <strong>동점 안내:</strong> 상위 권역에 동점이 발생했습니다. 공동 순위로 계산되며 최상단 및 최종 선정 탭에서 확인이 가능합니다.
+            </div>
+
+            <!-- List of Ranked Attitude Items with Horizontal Bar Charts -->
+            <div id="attitude-rank-list" class="space-y-4">
+              <!-- JS Generated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 5: REASONS BY RULE -->
+        <!-- ======================================================= -->
+        <div id="teacher-tab-reasons" class="hidden space-y-6">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 custom-shadow space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 class="text-xl font-bold text-slate-900">규칙별 학생 작성 이유 모아보기</h3>
+                <p class="text-xs text-slate-500 mt-0.5">학생들이 직접 작성한 원문 그대로를 확인할 수 있습니다.</p>
+              </div>
+
+              <!-- Rule Category Switcher & Rule Selector -->
+              <div class="flex flex-col sm:flex-row gap-2">
+                <select id="reason-category-select" onchange="updateReasonRuleSelector()" class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-700 outline-none">
+                  <option value="safety">안전 영역 규칙</option>
+                  <option value="attitude">태도 영역 규칙</option>
+                </select>
+                <select id="reason-rule-select" onchange="renderReasonsList()" class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 outline-none max-w-xs truncate">
+                  <!-- Dynamic Options -->
+                </select>
+              </div>
+            </div>
+
+            <!-- Reasons List Display -->
+            <div id="reasons-display-container" class="space-y-3">
+              <!-- JS dynamic render -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TAB 6: FINAL SELECTED RULES -->
+        <!-- ======================================================= -->
+        <div id="teacher-tab-final" class="hidden space-y-8">
+          <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 custom-shadow text-center space-y-6">
+            
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-xs sm:text-sm font-bold">
+              <i class="fa-solid fa-trophy"></i> 학급 자율 규칙 최종 선출
+            </div>
+
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+              "우리의 선택이 우리의 약속이 됩니다."
+            </h2>
+
+            <p class="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
+              학생들이 가장 많이 선택한 안전 영역 3가지와 태도 영역 3가지 총 6가지 실천 수칙입니다.
+            </p>
+
+            <!-- Final 6 Rules Hero Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left pt-2">
+              
+              <!-- Safety Top 3 -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-2 font-bold text-base text-blue-700 border-b border-blue-100 pb-2">
+                  <i class="fa-solid fa-shield-halved text-lg"></i>
+                  <span>[안전 영역 최종 실천 규칙 3개]</span>
+                </div>
+                <div id="final-top-safety-cards" class="space-y-3">
+                  <!-- JS Cards -->
+                </div>
+              </div>
+
+              <!-- Attitude Top 3 -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-2 font-bold text-base text-purple-700 border-b border-purple-100 pb-2">
+                  <i class="fa-solid fa-heart text-lg"></i>
+                  <span>[태도 영역 최종 실천 규칙 3개]</span>
+                </div>
+                <div id="final-top-attitude-cards" class="space-y-3">
+                  <!-- JS Cards -->
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Footer Closing Banner -->
+            <div class="pt-6 border-t border-slate-100">
+              <div class="p-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl text-white shadow-xl space-y-2">
+                <p class="text-lg sm:text-2xl font-bold">
+                  "서로를 존중하고 안전하게 스마트폰을 사용하는 우리 반을 만들어 갑시다!"
+                </p>
+                <p class="text-xs sm:text-sm text-blue-100">
+                  중학교 2학년 자율 실천 규칙 제정 완료
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-auto py-6 text-center text-xs text-slate-400">
+    <div class="max-w-6xl mx-auto px-4">
+      <p>우리 반 스마트폰 자율 실천규칙 만들기 &copy; 2026 Middle School Smart Class</p>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT LOGIC -->
+  <!-- ========================================================================= -->
+  <script>
+    /* =========================================================================
+       DATA DEFINITIONS
+       ========================================================================= */
+
+    // 1. Safety Rules (안전 영역 10개)
+    const SAFETY_RULES = [
+      {
+        id: 1,
+        title: "필요한 어플리케이션만 다운로드 하기",
+        desc: "위변조된 어플리케이션 속에는 위험한 악성코드가 포함될 가능성이 있습니다. 따라서 꼭 필요한 어플리케이션 만 안전한지 검증 과정을 거쳐 다운로드 하는 것이 좋습니다."
+      },
+      {
+        id: 2,
+        title: "보낸 사람이 명확하지 않거나 의심스러운 메시지 및 메일 삭제하기",
+        desc: "문자메세지나 메일의 첨부파일이나 링크에는 악성코드가 포함되어 있는 사례가 많습니다. 따라서 아예 열어보거나 클릭하지 말고 삭제하는 것이 좋습니다."
+      },
+      {
+        id: 3,
+        title: "암호를 설정하고 정기적으로 변경하기",
+        desc: "스마트폰 속에는 나와 주위사람의 소중한 개인정보가 포함됩니다. 이 정보가 타인에게 제공되면 심각한 피해를 줄 수 있기 때문에 꼭 암호를 설정하여 나와 내 주위 사람을 보호해야 합니다."
+      },
+      {
+        id: 4,
+        title: "스마트폰 백신 프로그램 설치하기",
+        desc: "백신 프로그램을 반드시 설치하고, 최신버전으로 업데이트를 해야 합니다. 더불어 정기적인 바이러스 검사를 통해서 스마트폰의 안전을 확인하는 습관이 필요합니다."
+      },
+      {
+        id: 5,
+        title: "스마트폰 플랫폼 바꾸지 않기 (탈옥 및 루팅)",
+        desc: "스마트폰 플랫폼을 바꾸면 보안기능에 취약할 수 있으며, 변경과정에서 스마트폰이 작동불능 상태가 되는 사례가 빈번합니다."
+      },
+      {
+        id: 6,
+        title: "블루투스나 와이파이는 사용할 때만 켜놓기",
+        desc: "블루투스나 와이파이를 이용한 악성코드 유포 사례가 늘고 있습니다. 평소 꺼놓다가 필요할 때만 사용하는 것이 전원낭비를 줄이고 해킹 등의 위험요소도 줄일 수 있습니다."
+      },
+      {
+        id: 7,
+        title: "과도한 개인정보를 올리지 않기",
+        desc: "자신의 개인정보는 물론 친구에 관련된 정보를 올리는 것은 보이스피싱 등에 노출될 수 있습니다. 따라서 생일사진이나 다른 사람의 사진 등을 올리는 행위는 자제해야 합니다."
+      },
+      {
+        id: 8,
+        title: "타인의 저작물을 동의없이 올리지 않기",
+        desc: "타인의 저작물을 동의 없이 올리면 저작권법에 의해서 처벌을 받습니다. 따라서 저작권자의 허락을 구하거나 저작권과 무관한지를 살펴보는 습관이 중요합니다."
+      },
+      {
+        id: 9,
+        title: "걸을 때 스마트폰을 이용하지 않기",
+        desc: "인도나 횡단보도를 걸으면서 스마트폰을 보는 것은 큰 사고를 유발할 수 있습니다. 따라서 걸을 때는 반드시 스마트폰보다 전방과 좌우를 살피면서 걸어야 합니다."
+      },
+      {
+        id: 10,
+        title: "허위 글을 게시하거나 퍼나르지 않기",
+        desc: "사이버공간은 현실 공간보다 파급력이 훨씬 큽니다. 따라서 허위로 올린 글이 짧은 시간 동안 엄청난 파장을 몰고 올라올 수 있습니다. 그리고 이로 인해 게시자나 퍼 나른 사람 모두 처벌의 대상이 될 수 있으므로 절대 해서는 안됩니다."
+      }
+    ];
+
+    // 2. Attitude Rules (태도 영역 13개)
+    const ATTITUDE_RULES = [
+      {
+        id: 1,
+        title: "장시간 스마트폰을 사용할 때 반드시 쉬는 시간을 갖기",
+        desc: "스마트폰을 오래 사용할 때는 중간중간 쉬는 시간을 갖고 스트레칭이나 가벼운 운동으로 뇌와 근육의 긴장을 풀어줘야 합니다."
+      },
+      {
+        id: 2,
+        title: "다른 사람과 함께 할 때 스마트폰은 넣어두기",
+        desc: "식사시간이나 대화를 할 때처럼 다른 누군가와 의사소통을 할 때는 기초적인 예절로 스마트폰을 가방이나 주머니에 보이지 않게 넣어둡니다."
+      },
+      {
+        id: 3,
+        title: "바른 자세로 스마트폰 사용하기",
+        desc: "스마트폰을 할 때는 일정한 거리를 두고, 바른 자세로 해야 스마트폰으로 인한 다양한 신체적 질병을 예방할 수 있습니다."
+      },
+      {
+        id: 4,
+        title: "필요할 때만 스마트폰 사용하기",
+        desc: "식사를 할 때나 화장실에 갈 때 등 스마트폰이 굳이 필요하지 않을 경우에는 스마트폰을 사용하지 않습니다."
+      },
+      {
+        id: 5,
+        title: "잠자기 전 스마트폰 사용하지 않기",
+        desc: "잠자기 전이나 저녁 식사 시간 이후에는 스마트폰을 꺼두거나 매너모드로 전환해서 불필요한 두뇌활동을 줄이고 편안한 상태로 잠자리에 들 수 있도록 합니다."
+      },
+      {
+        id: 6,
+        title: "가정에서는 가족의 스마트폰 함께 모아두기",
+        desc: "신발장이나 식탁 위 등 가족이 정해놓은 장소에 스마트폰을 함께 모아둠으로써 불필요한 스마트폰의 사용을 줄이고 가족간의 대화의 시간을 가지려 노력합니다."
+      },
+      {
+        id: 7,
+        title: "자신의 스마트폰 사용 습관을 점검하기",
+        desc: "하루의 끝이나 한 주에 한 번씩 자신의 스마트폰 사용 습관을 반성해보고 새롭게 시작될 하루나 한 주에 스마트폰 사용 계획을 세워 규칙적으로 스마트폰을 사용합니다."
+      },
+      {
+        id: 8,
+        title: "나만의 스마트폰 사용 수칙 만들기",
+        desc: "스마트폰은 사람마다 사용하는 용도가 다르기 때문에 자기 자신에 맞는 스마트폰 사용 수칙을 정하고 스스로 조절하며 절제하는 습관을 갖도록 합니다."
+      },
+      {
+        id: 9,
+        title: "메시지 작성시 신중하게 생각하고 올리기",
+        desc: "메시지를 통해 다른 사람에게 자신의 생각이나 느낌을 전할 때는 오해의 소지가 있을 수도 있으니 상대방의 감정과 상황을 잘 파악하고 신중하게 메시지를 작성합니다."
+      },
+      {
+        id: 10,
+        title: "스마트폰에 과도하게 의지하지 않기",
+        desc: "무엇인가 궁금한 것이 생겼을 때는 바로 스마트폰을 통해 모르는 것을 확인하기보다는 대화나 깊이 생각해보고 스스로 사고하고 기억하는 습관을 가집니다."
+      },
+      {
+        id: 11,
+        title: "사이버 공간에서 타인 괴롭히지 않기",
+        desc: "사이버 공간에서는 사소한 말과 행동이 상대방에게 상처를 입힐 수도 있음을 기억하고 실생활에서처럼 다른 사람을 배려하고 아끼는 마음을 가져야 합니다."
+      },
+      {
+        id: 12,
+        title: "사이버 상에서 문제 발생 시 부모님이나 선생님께 도움 요청하기",
+        desc: "사이버 저작권 침해나 명예 훼손 등 법적인 문제가 발생하거나 사이버 폭력을 경험했을 경우, 혼자서 문제를 해결하기보다는 주변 어른들의 도움을 받아 신속히 문제를 해결합니다."
+      },
+      {
+        id: 13,
+        title: "사이버 상의 정보를 맹신하지 않기",
+        desc: "사이버 상에 올라온 다양한 정보들은 모두 올바른 것이 아님을 인식하고 비판적으로 정보를 바라보고 다양한 정보를 종합하여 균형잡힌 지적 향상을 위해 노력합니다."
+      }
+    ];
+
+    /* =========================================================================
+       APP STATE
+       ========================================================================= */
+    const state = {
+      studentId: '',
+      studentName: '',
+      selectedSafety: [], // Array of rule IDs
+      safetyReasons: {},  // map: ruleId -> reason string
+      selectedAttitude: [], // Array of rule IDs
+      attitudeReasons: {},  // map: ruleId -> reason string
+      
+      // All loaded student submissions (from localStorage or uploaded CSV)
+      allSubmissions: [],
+      uploadedFromCSV: false
+    };
+
+    /* =========================================================================
+       INITIALIZATION
+       ========================================================================= */
+    window.onload = function() {
+      renderSafetyCards();
+      renderAttitudeCards();
+      loadFromLocalStorage();
+      updateReasonRuleSelector();
+    };
+
+    // Navigation Switcher
+    function navigateTo(screenId) {
+      const screens = ['home', 'student-info', 'step1', 'step2', 'confirm', 'success', 'teacher-dashboard'];
+      screens.forEach(s => {
+        const el = document.getElementById(`screen-${s}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`screen-${screenId}`);
+      if (target) target.classList.remove('hidden');
+
+      // Update Nav Button Styles
+      const navHome = document.getElementById('nav-home');
+      const navStudent = document.getElementById('nav-student');
+      const navTeacher = document.getElementById('nav-teacher');
+
+      navHome.className = "px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-all flex items-center gap-1.5";
+      navStudent.className = "px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-all flex items-center gap-1.5";
+      navTeacher.className = "px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-all flex items-center gap-1.5";
+
+      if (screenId === 'home') {
+        navHome.className = "px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-blue-50 text-blue-600 transition-all flex items-center gap-1.5";
+      } else if (screenId === 'teacher-dashboard') {
+        navTeacher.className = "px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-blue-50 text-blue-600 transition-all flex items-center gap-1.5";
+        renderTeacherDashboard();
+      } else {
+        navStudent.className = "px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-blue-50 text-blue-600 transition-all flex items-center gap-1.5";
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Custom Toast Notification
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-message');
+      const icon = document.getElementById('toast-icon');
+
+      msg.innerText = message;
+      if (type === 'error') {
+        icon.className = 'fa-solid fa-circle-exclamation text-red-400 text-lg';
+      } else if (type === 'success') {
+        icon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+      } else {
+        icon.className = 'fa-solid fa-circle-info text-blue-400 text-lg';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    /* =========================================================================
+       STEP 0: STUDENT INFO INPUT HANDLER
+       ========================================================================= */
+    function handleInfoSubmit(e) {
+      e.preventDefault();
+      const idInput = document.getElementById('student-id').value.trim();
+      const nameInput = document.getElementById('student-name').value.trim();
+
+      if (!idInput || !nameInput) {
+        showToast('학번과 이름을 입력해주세요.', 'error');
+        return;
+      }
+
+      state.studentId = idInput;
+      state.studentName = nameInput;
+
+      navigateTo('step1');
+    }
+
+    /* =========================================================================
+       STEP 1: SAFETY RULES RENDER & LOGIC
+       ========================================================================= */
+    function renderSafetyCards() {
+      const container = document.getElementById('safety-rules-list');
+      container.innerHTML = '';
+
+      SAFETY_RULES.forEach((rule) => {
+        const isSelected = state.selectedSafety.includes(rule.id);
+        const reasonVal = state.safetyReasons[rule.id] || '';
+
+        const card = document.createElement('div');
+        card.id = `safety-card-${rule.id}`;
+        card.className = `bg-white rounded-2xl p-5 border-2 transition-all flex flex-col justify-between custom-shadow ${isSelected ? 'card-selected' : 'border-slate-100 hover:border-slate-300'}`;
+
+        card.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <span class="inline-block px-2.5 py-1 bg-blue-50 text-blue-700 font-extrabold text-xs rounded-lg">
+                규칙 ${rule.id}
+              </span>
+              <button type="button" onclick="toggleSafetySelect(${rule.id})" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} flex items-center gap-1.5">
+                <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-plus'}"></i>
+                <span>${isSelected ? '선택됨' : '선택'}</span>
+              </button>
+            </div>
+            
+            <h3 class="font-bold text-base sm:text-lg text-slate-900 leading-snug">${rule.title}</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${rule.desc}</p>
+          </div>
+
+          <!-- Reason Input Field (Visible only when selected) -->
+          <div id="safety-reason-box-${rule.id}" class="${isSelected ? 'block' : 'hidden'} pt-4 mt-4 border-t border-slate-200 space-y-1.5">
+            <label class="block text-xs font-bold text-blue-800">
+              <i class="fa-solid fa-pen text-blue-500 mr-1"></i> 이 규칙이 왜 필요하다고 생각하나요? <span class="text-red-500">*</span>
+            </label>
+            <textarea oninput="handleReasonInput('safety', ${rule.id}, this.value)" rows="2" placeholder="필요한 이유를 적어주세요..." class="w-full p-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none resize-none bg-white">${reasonVal}</textarea>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      updateSafetyUI();
+    }
+
+    function toggleSafetySelect(ruleId) {
+      const idx = state.selectedSafety.indexOf(ruleId);
+      if (idx > -1) {
+        state.selectedSafety.splice(idx, 1);
+        delete state.safetyReasons[ruleId];
+      } else {
+        if (state.selectedSafety.length >= 3) {
+          showToast('안전 영역 규칙은 최대 3개까지만 선택할 수 있습니다.', 'error');
+          return;
+        }
+        state.selectedSafety.push(ruleId);
+      }
+      renderSafetyCards();
+    }
+
+    function updateSafetyUI() {
+      const counter = document.getElementById('safety-counter');
+      const count = state.selectedSafety.length;
+      counter.innerText = `${count} / 3`;
+
+      const btnToStep2 = document.getElementById('btn-to-step2');
+      if (count === 3) {
+        btnToStep2.disabled = false;
+        btnToStep2.className = "px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center gap-2 cursor-pointer";
+      } else {
+        btnToStep2.disabled = true;
+        btnToStep2.className = "px-6 py-3.5 bg-slate-300 text-slate-500 font-bold text-sm sm:text-base rounded-xl cursor-not-allowed transition-all flex items-center gap-2";
+      }
+    }
+
+    function goToStep2() {
+      if (state.selectedSafety.length !== 3) {
+        showToast('안전 영역 규칙 3개를 정확히 선택해야 합니다.', 'error');
+        return;
+      }
+      // Check if reasons are filled
+      for (const rId of state.selectedSafety) {
+        if (!state.safetyReasons[rId] || state.safetyReasons[rId].trim() === '') {
+          showToast('선택한 모든 안전 규칙에 필요한 이유를 작성해주세요.', 'error');
+          return;
+        }
+      }
+      navigateTo('step2');
+    }
+
+    /* =========================================================================
+       STEP 2: ATTITUDE RULES RENDER & LOGIC
+       ========================================================================= */
+    function renderAttitudeCards() {
+      const container = document.getElementById('attitude-rules-list');
+      container.innerHTML = '';
+
+      ATTITUDE_RULES.forEach((rule) => {
+        const isSelected = state.selectedAttitude.includes(rule.id);
+        const reasonVal = state.attitudeReasons[rule.id] || '';
+
+        const card = document.createElement('div');
+        card.id = `attitude-card-${rule.id}`;
+        card.className = `bg-white rounded-2xl p-5 border-2 transition-all flex flex-col justify-between custom-shadow ${isSelected ? 'card-selected' : 'border-slate-100 hover:border-slate-300'}`;
+
+        card.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <span class="inline-block px-2.5 py-1 bg-purple-50 text-purple-700 font-extrabold text-xs rounded-lg">
+                규칙 ${rule.id}
+              </span>
+              <button type="button" onclick="toggleAttitudeSelect(${rule.id})" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isSelected ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} flex items-center gap-1.5">
+                <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-plus'}"></i>
+                <span>${isSelected ? '선택됨' : '선택'}</span>
+              </button>
+            </div>
+            
+            <h3 class="font-bold text-base sm:text-lg text-slate-900 leading-snug">${rule.title}</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${rule.desc}</p>
+          </div>
+
+          <!-- Reason Input Field (Visible only when selected) -->
+          <div id="attitude-reason-box-${rule.id}" class="${isSelected ? 'block' : 'hidden'} pt-4 mt-4 border-t border-slate-200 space-y-1.5">
+            <label class="block text-xs font-bold text-purple-800">
+              <i class="fa-solid fa-pen text-purple-500 mr-1"></i> 이 규칙이 왜 필요하다고 생각하나요? <span class="text-red-500">*</span>
+            </label>
+            <textarea oninput="handleReasonInput('attitude', ${rule.id}, this.value)" rows="2" placeholder="필요한 이유를 적어주세요..." class="w-full p-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none resize-none bg-white">${reasonVal}</textarea>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      updateAttitudeUI();
+    }
+
+    function toggleAttitudeSelect(ruleId) {
+      const idx = state.selectedAttitude.indexOf(ruleId);
+      if (idx > -1) {
+        state.selectedAttitude.splice(idx, 1);
+        delete state.attitudeReasons[ruleId];
+      } else {
+        if (state.selectedAttitude.length >= 3) {
+          showToast('태도 영역 규칙은 최대 3개까지만 선택할 수 있습니다.', 'error');
+          return;
+        }
+        state.selectedAttitude.push(ruleId);
+      }
+      renderAttitudeCards();
+    }
+
+    function updateAttitudeUI() {
+      const counter = document.getElementById('attitude-counter');
+      const count = state.selectedAttitude.length;
+      counter.innerText = `${count} / 3`;
+
+      const btnToConfirm = document.getElementById('btn-to-confirm');
+      if (count === 3) {
+        btnToConfirm.disabled = false;
+        btnToConfirm.className = "px-6 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-purple-500/25 transition-all flex items-center gap-2 cursor-pointer";
+      } else {
+        btnToConfirm.disabled = true;
+        btnToConfirm.className = "px-6 py-3.5 bg-slate-300 text-slate-500 font-bold text-sm sm:text-base rounded-xl cursor-not-allowed transition-all flex items-center gap-2";
+      }
+    }
+
+    function handleReasonInput(category, ruleId, val) {
+      if (category === 'safety') {
+        state.safetyReasons[ruleId] = val;
+      } else {
+        state.attitudeReasons[ruleId] = val;
+      }
+    }
+
+    function goToConfirm() {
+      if (state.selectedAttitude.length !== 3) {
+        showToast('태도 영역 규칙 3개를 정확히 선택해야 합니다.', 'error');
+        return;
+      }
+      // Check if reasons are filled
+      for (const rId of state.selectedAttitude) {
+        if (!state.attitudeReasons[rId] || state.attitudeReasons[rId].trim() === '') {
+          showToast('선택한 모든 태도 규칙에 필요한 이유를 작성해주세요.', 'error');
+          return;
+        }
+      }
+
+      renderConfirmScreen();
+      navigateTo('confirm');
+    }
+
+    /* =========================================================================
+       STEP 3: CONFIRMATION & SUBMIT
+       ========================================================================= */
+    function renderConfirmScreen() {
+      document.getElementById('confirm-id').innerText = state.studentId;
+      document.getElementById('confirm-name').innerText = state.studentName;
+
+      // Render Safety List Summary
+      const safetyContainer = document.getElementById('confirm-safety-list');
+      safetyContainer.innerHTML = '';
+      state.selectedSafety.forEach(rId => {
+        const rule = SAFETY_RULES.find(r => r.id === rId);
+        const reason = state.safetyReasons[rId] || '';
+
+        const item = document.createElement('div');
+        item.className = "p-3.5 bg-blue-50/60 rounded-xl border border-blue-100 space-y-1 text-xs sm:text-sm";
+        item.innerHTML = `
+          <div class="font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">${rule.id}</span>
+            <span>${rule.title}</span>
+          </div>
+          <p class="text-slate-600 pl-7"><span class="font-semibold text-blue-700">이유:</span> ${escapeHtml(reason)}</p>
+        `;
+        safetyContainer.appendChild(item);
+      });
+
+      // Render Attitude List Summary
+      const attitudeContainer = document.getElementById('confirm-attitude-list');
+      attitudeContainer.innerHTML = '';
+      state.selectedAttitude.forEach(rId => {
+        const rule = ATTITUDE_RULES.find(r => r.id === rId);
+        const reason = state.attitudeReasons[rId] || '';
+
+        const item = document.createElement('div');
+        item.className = "p-3.5 bg-purple-50/60 rounded-xl border border-purple-100 space-y-1 text-xs sm:text-sm";
+        item.innerHTML = `
+          <div class="font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold">${rule.id}</span>
+            <span>${rule.title}</span>
+          </div>
+          <p class="text-slate-600 pl-7"><span class="font-semibold text-purple-700">이유:</span> ${escapeHtml(reason)}</p>
+        `;
+        attitudeContainer.appendChild(item);
+      });
+    }
+
+    function submitVote() {
+      // Validate all required fields
+      if (!state.studentId || !state.studentName) {
+        showToast('학번과 이름이 누락되었습니다.', 'error');
+        return;
+      }
+      if (state.selectedSafety.length !== 3 || state.selectedAttitude.length !== 3) {
+        showToast('안전 영역 3개, 태도 영역 3개를 모두 선택해야 합니다.', 'error');
+        return;
+      }
+      for (const rId of state.selectedSafety) {
+        if (!state.safetyReasons[rId] || !state.safetyReasons[rId].trim()) {
+          showToast('선택한 안전 규칙의 이유를 모두 입력해야 합니다.', 'error');
+          return;
+        }
+      }
+      for (const rId of state.selectedAttitude) {
+        if (!state.attitudeReasons[rId] || !state.attitudeReasons[rId].trim()) {
+          showToast('선택한 태도 규칙의 이유를 모두 입력해야 합니다.', 'error');
+          return;
+        }
+      }
+
+      // Build Submission Record (Canva Code Compatible Format)
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+      const sRules = state.selectedSafety.map(id => SAFETY_RULES.find(r => r.id === id).title);
+      const sReasons = state.selectedSafety.map(id => state.safetyReasons[id]);
+
+      const aRules = state.selectedAttitude.map(id => ATTITUDE_RULES.find(r => r.id === id).title);
+      const aReasons = state.selectedAttitude.map(id => state.attitudeReasons[id]);
+
+      const submission = {
+        timestamp: timeStr,
+        studentId: state.studentId,
+        studentName: state.studentName,
+        safety1: sRules[0],
+        safetyReason1: sReasons[0],
+        safety2: sRules[1],
+        safetyReason2: sReasons[1],
+        safety3: sRules[2],
+        safetyReason3: sReasons[2],
+        attitude1: aRules[0],
+        attitudeReason1: aReasons[0],
+        attitude2: aRules[1],
+        attitudeReason2: aReasons[1],
+        attitude3: aRules[2],
+        attitudeReason3: aReasons[2]
+      };
+
+      // Save to localStorage array
+      let stored = JSON.parse(localStorage.getItem('smart_rules_submissions') || '[]');
+      stored.push(submission);
+      localStorage.setItem('smart_rules_submissions', JSON.stringify(stored));
+
+      // Refresh memory state
+      state.allSubmissions = stored;
+
+      showToast('성공적으로 저장되었습니다!', 'success');
+      navigateTo('success');
+    }
+
+    function downloadMyResponseCSV() {
+      if (!state.studentId) return;
+      const stored = JSON.parse(localStorage.getItem('smart_rules_submissions') || '[]');
+      const myLast = stored.filter(s => s.studentId === state.studentId).pop();
+
+      if (!myLast) {
+        showToast('저장된 제출 기록을 찾을 수 없습니다.', 'error');
+        return;
+      }
+
+      const headers = ["제출 일시", "학번", "이름", "안전 규칙 선택 1", "안전 규칙 이유 1", "안전 규칙 선택 2", "안전 규칙 이유 2", "안전 규칙 선택 3", "안전 규칙 이유 3", "태도 규칙 선택 1", "태도 규칙 이유 1", "태도 규칙 선택 2", "태도 규칙 이유 2", "태도 규칙 선택 3", "태도 규칙 이유 3"];
+      const row = [
+        myLast.timestamp, myLast.studentId, myLast.studentName,
+        myLast.safety1, myLast.safetyReason1,
+        myLast.safety2, myLast.safetyReason2,
+        myLast.safety3, myLast.safetyReason3,
+        myLast.attitude1, myLast.attitudeReason1,
+        myLast.attitude2, myLast.attitudeReason2,
+        myLast.attitude3, myLast.attitudeReason3
+      ].map(field => `"${String(field || '').replace(/"/g, '""')}"`);
+
+      const csvContent = "\uFEFF" + headers.join(",") + "\n" + row.join(",");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `스마트폰규칙_응답_${myLast.studentId}_${myLast.studentName}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /* =========================================================================
+       TEACHER DASHBOARD & CSV PARSING ENGINE
+       ========================================================================= */
+
+    function loadFromLocalStorage() {
+      const stored = JSON.parse(localStorage.getItem('smart_rules_submissions') || '[]');
+      state.allSubmissions = stored;
+      state.uploadedFromCSV = false;
+
+      document.getElementById('data-source-text').innerText = `로컬 브라우저 저장소 데이터 집계 중 (총 ${stored.length}건)`;
+      document.getElementById('last-updated-time').innerText = `최근 동기화: ${new Date().toLocaleTimeString()}`;
+
+      if (document.getElementById('screen-teacher-dashboard').classList.contains('hidden') === false) {
+        renderTeacherDashboard();
+      }
+    }
+
+    function handleCSVUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const text = e.target.result;
+          const parsed = parseCSVText(text);
+
+          if (!parsed || parsed.length === 0) {
+            showToast('CSV 데이터를 읽을 수 없거나 형식에 맞지 않습니다.', 'error');
+            return;
+          }
+
+          state.allSubmissions = parsed;
+          state.uploadedFromCSV = true;
+
+          document.getElementById('data-source-text').innerText = `업로드된 CSV 데이터 집계 중 (총 ${parsed.length}건 - 파일명: ${file.name})`;
+          document.getElementById('last-updated-time').innerText = `업로드 시각: ${new Date().toLocaleTimeString()}`;
+
+          showToast(`CSV 파일 (${parsed.length}건) 불러오기 성공!`, 'success');
+          renderTeacherDashboard();
+        } catch (err) {
+          console.error(err);
+          showToast('CSV 파일 구조가 일치하지 않거나 오류가 발생했습니다.', 'error');
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    // Robust CSV parser supporting quotes & line breaks inside fields
+    function parseCSVText(csvText) {
+      const lines = [];
+      let row = [];
+      let inQuotes = false;
+      let currentToken = '';
+
+      // Normalize newlines
+      const str = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+      for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+        const nextChar = str[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            currentToken += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          row.push(currentToken.trim());
+          currentToken = '';
+        } else if (char === '\n' && !inQuotes) {
+          row.push(currentToken.trim());
+          lines.push(row);
+          row = [];
+          currentToken = '';
+        } else {
+          currentToken += char;
+        }
+      }
+      if (currentToken || row.length > 0) {
+        row.push(currentToken.trim());
+        lines.push(row);
+      }
+
+      if (lines.length < 2) return [];
+
+      const headers = lines[0].map(h => h.replace(/^[\uFEFF]/, '').replace(/"/g, '').trim());
+      
+      // Mandatory expected header checks
+      const reqKeywords = ["학번", "이름"];
+      const hasReq = reqKeywords.every(k => headers.some(h => h.includes(k)));
+      if (!hasReq) {
+        throw new Error("CSV 헤더에서 '학번' 및 '이름' 열을 찾을 수 없습니다.");
+      }
+
+      // Map columns
+      const getIndex = (name) => headers.findIndex(h => h.includes(name));
+
+      const idxTime = getIndex("일시");
+      const idxId = getIndex("학번");
+      const idxName = getIndex("이름");
+
+      const idxS1 = getIndex("안전 규칙 선택 1");
+      const idxSR1 = getIndex("안전 규칙 이유 1");
+      const idxS2 = getIndex("안전 규칙 선택 2");
+      const idxSR2 = getIndex("안전 규칙 이유 2");
+      const idxS3 = getIndex("안전 규칙 선택 3");
+      const idxSR3 = getIndex("안전 규칙 이유 3");
+
+      const idxA1 = getIndex("태도 규칙 선택 1");
+      const idxAR1 = getIndex("태도 규칙 이유 1");
+      const idxA2 = getIndex("태도 규칙 선택 2");
+      const idxAR2 = getIndex("태도 규칙 이유 2");
+      const idxA3 = getIndex("태도 규칙 선택 3");
+      const idxAR3 = getIndex("태도 규칙 이유 3");
+
+      const results = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const r = lines[i];
+        if (r.length < 3 || (!r[idxId] && !r[idxName])) continue; // skip empty lines
+
+        results.push({
+          timestamp: r[idxTime] || '',
+          studentId: r[idxId] || '',
+          studentName: r[idxName] || '',
+          safety1: r[idxS1] || '',
+          safetyReason1: r[idxSR1] || '',
+          safety2: r[idxS2] || '',
+          safetyReason2: r[idxSR2] || '',
+          safety3: r[idxS3] || '',
+          safetyReason3: r[idxSR3] || '',
+          attitude1: r[idxA1] || '',
+          attitudeReason1: r[idxAR1] || '',
+          attitude2: r[idxA2] || '',
+          attitudeReason2: r[idxAR2] || '',
+          attitude3: r[idxA3] || '',
+          attitudeReason3: r[idxAR3] || ''
+        });
+      }
+
+      return results;
+    }
+
+    /* =========================================================================
+       TEACHER DASHBOARD ANALYTICS ENGINE
+       ========================================================================= */
+
+    function processDashboardStats() {
+      const subs = state.allSubmissions;
+      const totalResponses = subs.length;
+
+      // Detect Duplicate Student IDs
+      const idMap = {};
+      subs.forEach(s => {
+        if (!idMap[s.studentId]) idMap[s.studentId] = [];
+        idMap[s.studentId].push(s);
+      });
+
+      const duplicateIds = Object.keys(idMap).filter(id => idMap[id].length > 1);
+      const duplicateCount = duplicateIds.length;
+
+      // Unique Valid Student Submissions (Take latest submission for stats)
+      const validSubmissionsMap = {};
+      subs.forEach(s => {
+        validSubmissionsMap[s.studentId] = s;
+      });
+      const validSubmissions = Object.values(validSubmissionsMap);
+      const validCount = validSubmissions.length;
+
+      // Count Votes for Safety Items
+      const safetyCounts = {};
+      SAFETY_RULES.forEach(r => safetyCounts[r.id] = 0);
+
+      // Count Votes for Attitude Items
+      const attitudeCounts = {};
+      ATTITUDE_RULES.forEach(r => attitudeCounts[r.id] = 0);
+
+      let totalSafetyVotes = 0;
+      let totalAttitudeVotes = 0;
+
+      validSubmissions.forEach(sub => {
+        // Safety rules vote count
+        const sTitles = [sub.safety1, sub.safety2, sub.safety3];
+        const votedSafetyIds = new Set(); // Prevent double counting per student
+
+        sTitles.forEach(t => {
+          if (!t) return;
+          const matched = SAFETY_RULES.find(r => r.title.trim() === t.trim() || t.includes(r.title));
+          if (matched) votedSafetyIds.add(matched.id);
+        });
+
+        votedSafetyIds.forEach(id => {
+          safetyCounts[id]++;
+          totalSafetyVotes++;
+        });
+
+        // Attitude rules vote count
+        const aTitles = [sub.attitude1, sub.attitude2, sub.attitude3];
+        const votedAttitudeIds = new Set();
+
+        aTitles.forEach(t => {
+          if (!t) return;
+          const matched = ATTITUDE_RULES.find(r => r.title.trim() === t.trim() || t.includes(r.title));
+          if (matched) votedAttitudeIds.add(matched.id);
+        });
+
+        votedAttitudeIds.forEach(id => {
+          attitudeCounts[id]++;
+          totalAttitudeVotes++;
+        });
+      });
+
+      // Calculate Ranks & Percentages (Formula: 득표수 / 유효 학생 수 * 100)
+      const calculateRankings = (rules, countMap) => {
+        const sorted = rules.map(rule => {
+          const votes = countMap[rule.id] || 0;
+          const pct = validCount > 0 ? ((votes / validCount) * 100).toFixed(1) : 0;
+          return {
+            ...rule,
+            votes,
+            pct: parseFloat(pct)
+          };
+        }).sort((a, b) => b.votes - a.votes);
+
+        // Assign dense ranks (joint ranks for ties)
+        let currentRank = 1;
+        for (let i = 0; i < sorted.length; i++) {
+          if (i > 0 && sorted[i].votes < sorted[i - 1].votes) {
+            currentRank = i + 1;
+          }
+          sorted[i].rank = currentRank;
+        }
+
+        return sorted;
+      };
+
+      const safetyRanked = calculateRankings(SAFETY_RULES, safetyCounts);
+      const attitudeRanked = calculateRankings(ATTITUDE_RULES, attitudeCounts);
+
+      // Check if tie exists near Top 3 boundary
+      const hasSafetyTie = safetyRanked.length > 3 && (safetyRanked[2].votes === safetyRanked[3].votes);
+      const hasAttitudeTie = attitudeRanked.length > 3 && (attitudeRanked[2].votes === attitudeRanked[3].votes);
+
+      return {
+        totalResponses,
+        validCount,
+        duplicateIds,
+        duplicateCount,
+        totalSafetyVotes,
+        totalAttitudeVotes,
+        safetyRanked,
+        attitudeRanked,
+        hasSafetyTie,
+        hasAttitudeTie
+      };
+    }
+
+    /* =========================================================================
+       TEACHER TAB RENDERERS
+       ========================================================================= */
+
+    function switchTeacherTab(tabName) {
+      const tabs = ['summary', 'students', 'safety', 'attitude', 'reasons', 'final'];
+      tabs.forEach(t => {
+        document.getElementById(`teacher-tab-${t}`).classList.add('hidden');
+        document.getElementById(`tab-btn-${t}`).className = "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
+      });
+
+      document.getElementById(`teacher-tab-${tabName}`).classList.remove('hidden');
+      document.getElementById(`tab-btn-${tabName}`).className = "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-slate-900 text-white";
+
+      if (tabName === 'reasons') {
+        renderReasonsList();
+      }
+    }
+
+    function renderTeacherDashboard() {
+      const stats = processDashboardStats();
+
+      // 1. Update Summary Stats Numbers
+      document.getElementById('stat-total-responses').innerText = stats.totalResponses;
+      document.getElementById('stat-valid-responses').innerText = stats.validCount;
+      document.getElementById('stat-duplicate-ids').innerText = stats.duplicateCount;
+      document.getElementById('stat-safety-votes').innerText = stats.totalSafetyVotes;
+      document.getElementById('stat-attitude-votes').innerText = stats.totalAttitudeVotes;
+
+      // 2. Duplicate Alert Banner
+      const dupBox = document.getElementById('duplicate-alert-box');
+      const dupBadges = document.getElementById('duplicate-list-badges');
+      if (stats.duplicateCount > 0) {
+        dupBox.classList.remove('hidden');
+        dupBadges.innerHTML = stats.duplicateIds.map(id => `<span class="px-2.5 py-1 bg-amber-200 text-amber-900 font-extrabold text-xs rounded-md">학번: ${id}</span>`).join('');
+      } else {
+        dupBox.classList.add('hidden');
+      }
+
+      // 3. Render Top 3 Summary Cards
+      renderSummaryTop3('summary-top-safety', stats.safetyRanked.slice(0, 3), 'blue');
+      renderSummaryTop3('summary-top-attitude', stats.attitudeRanked.slice(0, 3), 'purple');
+
+      // 4. Render Student Submissions Table/Cards
+      renderStudentResponsesList();
+
+      // 5. Render Ranked Safety List
+      renderRankedList('safety-rank-list', stats.safetyRanked, stats.validCount, 'blue', stats.hasSafetyTie);
+      document.getElementById('safety-tie-alert').classList.toggle('hidden', !stats.hasSafetyTie);
+
+      // 6. Render Ranked Attitude List
+      renderRankedList('attitude-rank-list', stats.attitudeRanked, stats.validCount, 'purple', stats.hasAttitudeTie);
+      document.getElementById('attitude-tie-alert').classList.toggle('hidden', !stats.hasAttitudeTie);
+
+      // 7. Render Final Top Selected 6 Rules Hero View
+      renderFinalSelectedHero(stats.safetyRanked, stats.attitudeRanked);
+    }
+
+    function renderSummaryTop3(elementId, top3, colorTheme) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+
+      if (!top3 || top3.length === 0 || top3[0].votes === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">제출된 데이터가 없습니다.</p>`;
+        return;
+      }
+
+      top3.forEach((item) => {
+        const div = document.createElement('div');
+        div.className = `p-3.5 rounded-xl border border-${colorTheme}-100 bg-${colorTheme}-50/50 flex items-center justify-between text-xs sm:text-sm`;
+        div.innerHTML = `
+          <div class="flex items-center gap-2.5 truncate pr-2">
+            <span class="w-6 h-6 rounded-lg bg-${colorTheme}-600 text-white font-extrabold text-xs flex items-center justify-center shrink-0">
+              ${item.rank}위
+            </span>
+            <span class="font-bold text-slate-800 truncate">${item.title}</span>
+          </div>
+          <div class="text-right shrink-0 font-bold text-${colorTheme}-700">
+            ${item.votes}표 <span class="text-slate-400 text-xs">(${item.pct}%)</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderStudentResponsesList() {
+      const container = document.getElementById('student-responses-container');
+      container.innerHTML = '';
+
+      if (state.allSubmissions.length === 0) {
+        container.innerHTML = `<p class="text-sm text-slate-400 py-8 text-center">제출된 학생 응답이 없습니다.</p>`;
+        return;
+      }
+
+      // Check duplicates for badges
+      const idCounts = {};
+      state.allSubmissions.forEach(s => idCounts[s.studentId] = (idCounts[s.studentId] || 0) + 1);
+
+      state.allSubmissions.forEach((sub, idx) => {
+        const isDup = idCounts[sub.studentId] > 1;
+
+        const card = document.createElement('div');
+        card.className = `student-card bg-slate-50 border ${isDup ? 'border-amber-300 bg-amber-50/40' : 'border-slate-200'} rounded-2xl p-4 transition-all`;
+        card.setAttribute('data-search', `${sub.studentId} ${sub.studentName}`);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between cursor-pointer" onclick="toggleStudentDetails(${idx})">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 bg-slate-800 text-white font-bold text-xs rounded-lg">${sub.studentId}</span>
+              <span class="font-bold text-slate-900 text-sm sm:text-base">${sub.studentName}</span>
+              ${isDup ? '<span class="px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded-md"><i class="fa-solid fa-triangle-exclamation"></i> 중복제출</span>' : ''}
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+              <span class="hidden sm:inline">${sub.timestamp}</span>
+              <i id="student-arrow-${idx}" class="fa-solid fa-chevron-down transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Expandable Details -->
+          <div id="student-details-${idx}" class="hidden pt-4 mt-3 border-t border-slate-200/80 space-y-4 text-xs sm:text-sm">
+            <!-- Safety -->
+            <div class="space-y-2">
+              <h4 class="font-bold text-blue-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-halved"></i> 안전 영역 선택:
+              </h4>
+              <ul class="space-y-1.5 pl-2">
+                <li class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="font-bold text-slate-800">1. ${sub.safety1}</span>
+                  <p class="text-slate-600 mt-0.5"><span class="text-blue-600 font-medium">이유:</span> ${escapeHtml(sub.safetyReason1)}</p>
+                </li>
+                <li class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="font-bold text-slate-800">2. ${sub.safety2}</span>
+                  <p class="text-slate-600 mt-0.5"><span class="text-blue-600 font-medium">이유:</span> ${escapeHtml(sub.safetyReason2)}</p>
+                </li>
+                <li class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="font-bold text-slate-800">3. ${sub.safety3}</span>
+                  <p class="text-slate-600 mt-0.5"><span class="text-blue-600 font-medium">이유:</span> ${escapeHtml(sub.safetyReason3)}</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Attitude -->
+            <div class="space-y-2">
+              <h4 class="font-bold text-purple-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-heart"></i> 태도 영역 선택:
+              </h4>
+              <ul class="space-y-1.5 pl-2">
+                <li class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="font-bold text-slate-800">1. ${sub.attitude1}</span>
+                  <p class="text-slate-600 mt-0.5"><span class="text-purple-600 font-medium">이유:</span> ${escapeHtml(sub.attitudeReason1)}</p>
+                </li>
+                <li class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="font-bold text-slate-800">2. ${sub.attitude2}</span>
+                  <p class="text-slate-600 mt-0.5"><span class="text-purple-600 font-medium">이유:</span> ${escapeHtml(sub.attitudeReason2)}</p>
+                </li>
+                <li class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="font-bold text-slate-800">3. ${sub.attitude3}</span>
+                  <p class="text-slate-600 mt-0.5"><span class="text-purple-600 font-medium">이유:</span> ${escapeHtml(sub.attitudeReason3)}</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function toggleStudentDetails(idx) {
+      const details = document.getElementById(`student-details-${idx}`);
+      const arrow = document.getElementById(`student-arrow-${idx}`);
+      if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+      } else {
+        details.classList.add('hidden');
+        arrow.classList.remove('rotate-180');
+      }
+    }
+
+    function filterStudentResponses() {
+      const query = document.getElementById('student-search-input').value.toLowerCase().trim();
+      const cards = document.querySelectorAll('.student-card');
+
+      cards.forEach(card => {
+        const searchData = card.getAttribute('data-search').toLowerCase();
+        if (searchData.includes(query)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    function renderRankedList(containerId, rankedItems, validTotalCount, themeColor, hasTie) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      rankedItems.forEach((item, index) => {
+        const isTop3 = index < 3;
+        const isTieRank = rankedItems.filter(r => r.rank === item.rank).length > 1;
+
+        const card = document.createElement('div');
+        card.className = `p-4 sm:p-5 rounded-2xl border ${isTop3 ? `border-${themeColor}-300 bg-${themeColor}-50/40 shadow-sm` : 'border-slate-200 bg-white'} space-y-3`;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl ${isTop3 ? `bg-${themeColor}-600 text-white` : 'bg-slate-200 text-slate-700'} font-extrabold text-sm flex items-center justify-center shrink-0">
+                ${item.rank}위
+              </span>
+              <div>
+                <h4 class="font-bold text-sm sm:text-base text-slate-900">${item.title} ${isTieRank ? '<span class="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-800 rounded">공동 순위</span>' : ''}</h4>
+                <p class="text-xs text-slate-500 line-clamp-1">${item.desc}</p>
+              </div>
+            </div>
+            
+            <div class="text-right shrink-0">
+              <span class="text-base sm:text-lg font-extrabold text-${themeColor}-700">${item.votes}표</span>
+              <span class="block text-xs text-slate-500">(${item.pct}%)</span>
+            </div>
+          </div>
+
+          <!-- Horizontal Bar Chart -->
+          <div class="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden flex">
+            <div class="bg-gradient-to-r ${themeColor === 'blue' ? 'from-blue-500 to-indigo-600' : 'from-purple-500 to-pink-600'} h-full rounded-full transition-all duration-700" style="width: ${item.pct}%"></div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    /* =========================================================================
+       REASONS BY RULE DISPLAY
+       ========================================================================= */
+
+    function updateReasonRuleSelector() {
+      const cat = document.getElementById('reason-category-select').value;
+      const ruleSelect = document.getElementById('reason-rule-select');
+      ruleSelect.innerHTML = '';
+
+      const rules = (cat === 'safety') ? SAFETY_RULES : ATTITUDE_RULES;
+      rules.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.innerText = `규칙 ${r.id}. ${r.title}`;
+        ruleSelect.appendChild(opt);
+      });
+
+      renderReasonsList();
+    }
+
+    function renderReasonsList() {
+      const cat = document.getElementById('reason-category-select').value;
+      const ruleId = parseInt(document.getElementById('reason-rule-select').value);
+      const container = document.getElementById('reasons-display-container');
+      container.innerHTML = '';
+
+      const rule = (cat === 'safety') ? SAFETY_RULES.find(r => r.id === ruleId) : ATTITUDE_RULES.find(r => r.id === ruleId);
+      if (!rule) return;
+
+      // Extract all verbatim student reasons for this rule
+      const reasonsList = [];
+      state.allSubmissions.forEach(sub => {
+        if (cat === 'safety') {
+          if (sub.safety1 && sub.safety1.includes(rule.title)) reasonsList.push({ id: sub.studentId, name: sub.studentName, reason: sub.safetyReason1 });
+          if (sub.safety2 && sub.safety2.includes(rule.title)) reasonsList.push({ id: sub.studentId, name: sub.studentName, reason: sub.safetyReason2 });
+          if (sub.safety3 && sub.safety3.includes(rule.title)) reasonsList.push({ id: sub.studentId, name: sub.studentName, reason: sub.safetyReason3 });
+        } else {
+          if (sub.attitude1 && sub.attitude1.includes(rule.title)) reasonsList.push({ id: sub.studentId, name: sub.studentName, reason: sub.attitudeReason1 });
+          if (sub.attitude2 && sub.attitude2.includes(rule.title)) reasonsList.push({ id: sub.studentId, name: sub.studentName, reason: sub.attitudeReason2 });
+          if (sub.attitude3 && sub.attitude3.includes(rule.title)) reasonsList.push({ id: sub.studentId, name: sub.studentName, reason: sub.attitudeReason3 });
+        }
+      });
+
+      if (reasonsList.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 text-sm">해당 규칙을 선택하고 이유를 작성한 학생이 아직 없습니다.</div>`;
+        return;
+      }
+
+      const headerInfo = document.createElement('div');
+      headerInfo.className = "p-4 bg-slate-100 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 mb-4";
+      headerInfo.innerHTML = `규칙: [${cat === 'safety' ? '안전' : '태도'}] ${rule.title} (선택 학생 수: ${reasonsList.length}명)`;
+      container.appendChild(headerInfo);
+
+      reasonsList.forEach(item => {
+        const itemBox = document.createElement('div');
+        itemBox.className = "p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1 text-xs sm:text-sm";
+        itemBox.innerHTML = `
+          <div class="flex items-center gap-2 font-bold text-slate-700">
+            <span class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded text-xs">${item.id} ${item.name}</span>
+          </div>
+          <p class="text-slate-800 leading-relaxed font-normal pt-1">"${escapeHtml(item.reason)}"</p>
+        `;
+        container.appendChild(itemBox);
+      });
+    }
+
+    /* =========================================================================
+       HERO FINAL VIEW RENDER
+       ========================================================================= */
+
+    function renderFinalSelectedHero(safetyRanked, attitudeRanked) {
+      const safetyContainer = document.getElementById('final-top-safety-cards');
+      const attitudeContainer = document.getElementById('final-top-attitude-cards');
+
+      safetyContainer.innerHTML = '';
+      attitudeContainer.innerHTML = '';
+
+      const top3Safety = safetyRanked.slice(0, 3);
+      const top3Attitude = attitudeRanked.slice(0, 3);
+
+      top3Safety.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = "p-5 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-2 shadow-sm";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 bg-blue-600 text-white font-extrabold text-xs rounded-lg">안전 규칙 #${i+1}</span>
+            <span class="font-extrabold text-blue-700 text-sm">${item.votes}표</span>
+          </div>
+          <h4 class="font-extrabold text-base sm:text-lg text-slate-900 leading-snug">${item.title}</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
+        `;
+        safetyContainer.appendChild(card);
+      });
+
+      top3Attitude.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = "p-5 bg-purple-50/70 border border-purple-200 rounded-2xl space-y-2 shadow-sm";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 bg-purple-600 text-white font-extrabold text-xs rounded-lg">태도 규칙 #${i+1}</span>
+            <span class="font-extrabold text-purple-700 text-sm">${item.votes}표</span>
+          </div>
+          <h4 class="font-extrabold text-base sm:text-lg text-slate-900 leading-snug">${item.title}</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
+        `;
+        attitudeContainer.appendChild(card);
+      });
+    }
+
+    /* =========================================================================
+       SUMMARY RESULTS EXPORT CSV FOR TEACHER
+       ========================================================================= */
+    function downloadResultsSummaryCSV() {
+      const stats = processDashboardStats();
+
+      let csv = "\uFEFF";
+      csv += "=== 우리 반 스마트폰 자율 실천규칙 투표 결과 통계 ===\n\n";
+      csv += `총 제출 응답 수,${stats.totalResponses}\n`;
+      csv += `유효 학생 수,${stats.validCount}\n`;
+      csv += `중복 학번 수,${stats.duplicateCount}\n\n`;
+
+      csv += "=== 안전 영역 투표 순위 ===\n";
+      csv += "순위,규칙 번호,규칙 제목,득표수,득표율(%)\n";
+      stats.safetyRanked.forEach(r => {
+        csv += `${r.rank},"${r.id}","${r.title.replace(/"/g, '""')}",${r.votes},${r.pct}%\n`;
+      });
+
+      csv += "\n=== 태도 영역 투표 순위 ===\n";
+      csv += "순위,규칙 번호,규칙 제목,득표수,득표율(%)\n";
+      stats.attitudeRanked.forEach(r => {
+        csv += `${r.rank},"${r.id}","${r.title.replace(/"/g, '""')}",${r.votes},${r.pct}%\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `스마트폰_실천규칙_최종집계결과.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Helper Utility for HTML Escaping
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&pre;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
